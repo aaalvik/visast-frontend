@@ -2,6 +2,7 @@
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE OverloadedStrings #-}
 
 module App where
 
@@ -15,13 +16,10 @@ import System.IO
 
 -- * API
 
-type AstAPI=
-  "step" :> ReqBody '[JSON] AST :> Post '[JSON] AST :<|>
-  "initial" :> Get '[JSON] AST 
+type AstAPI =
+  "step" :> ReqBody '[JSON] AST :> Post '[JSON] (Headers '[Header "Access-Control-Allow-Origin" String] AST) :<|>
+  "initial" :> Get '[JSON] (Headers '[Header "Access-Control-Allow-Origin" String] AST) 
 
-
-astAPI :: Proxy AstAPI 
-astAPI = Proxy
 
 
 -- * APP
@@ -37,22 +35,30 @@ run = do
 
 
 mkApp :: IO Application
-mkApp = return $ serve astAPI server
+mkApp = return $ serve (Proxy :: Proxy AstAPI) server
+
+
+frontendUrl :: String 
+frontendUrl = "http://localhost:8080"
+
+stepWithHeader :: AST -> Handler (Headers '[Header "Access-Control-Allow-Origin" String] AST)
+stepWithHeader ast = addHeader frontendUrl <$> step ast
+  where 
+    step :: AST -> Handler AST 
+    step ast = return ast
+
+
+initialWithHeader :: Handler (Headers '[Header "Access-Control-Allow-Origin" String] AST)
+initialWithHeader = addHeader frontendUrl <$> initial 
+  where 
+    initial :: Handler AST 
+    initial = return initialAST
 
 
 server :: Server AstAPI
 server =
-  step :<|>
-  getInitialAST
-
-
-step :: AST -> Handler AST
-step ast = return ast 
-
-
-getInitialAST :: Handler AST
-getInitialAST = return initialAST
-
+  stepWithHeader :<|> initialWithHeader
+ 
 
 -- * Types 
 
@@ -66,6 +72,7 @@ instance ToJSON AST
 instance FromJSON AST 
 
 
+initialAST :: AST 
 initialAST = AST "Node" []
 
 
