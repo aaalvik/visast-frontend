@@ -6,7 +6,7 @@
 
 module App where
 
-  
+
 import Data.Aeson
 import GHC.Generics
 import Network.Wai
@@ -19,7 +19,6 @@ import System.IO
 type AstAPI =
   "step" :> ReqBody '[JSON] AST :> Post '[JSON] (Headers '[Header "Access-Control-Allow-Origin" String] AST) :<|>
   "initial" :> Get '[JSON] (Headers '[Header "Access-Control-Allow-Origin" String] AST) 
-
 
 
 -- * APP
@@ -41,11 +40,12 @@ mkApp = return $ serve (Proxy :: Proxy AstAPI) server
 frontendUrl :: String 
 frontendUrl = "http://localhost:8080"
 
+
 stepWithHeader :: AST -> Handler (Headers '[Header "Access-Control-Allow-Origin" String] AST)
 stepWithHeader ast = addHeader frontendUrl <$> step ast
   where 
     step :: AST -> Handler AST 
-    step ast = return ast
+    step ast = return stepAST
 
 
 initialWithHeader :: Handler (Headers '[Header "Access-Control-Allow-Origin" String] AST)
@@ -76,4 +76,7 @@ initialAST :: AST
 initialAST = AST "Node" []
 
 
+stepAST :: AST 
+stepAST = AST "STEPPPPPP" []
+ 
 type Name = String 
