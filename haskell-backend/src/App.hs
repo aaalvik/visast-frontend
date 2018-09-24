@@ -7,18 +7,24 @@
 module App where
 
 
-import Data.Aeson
-import GHC.Generics
+import Types 
+import Evaluator 
+-- import Data.Aeson
+-- import GHC.Generics
 import Network.Wai
 import Network.Wai.Handler.Warp
 import Servant
 import System.IO
+import Network.Wai.Middleware.Cors
+import Network.Wai.Middleware.Servant.Options
 
 -- * API
 
 type AstAPI =
-  "step" :> ReqBody '[JSON] AST :> Post '[JSON] (Headers '[Header "Access-Control-Allow-Origin" String] AST) :<|>
-  "initial" :> Get '[JSON] (Headers '[Header "Access-Control-Allow-Origin" String] AST) 
+  "step" :> ReqBody '[JSON] AST :> Post '[JSON] AST :<|>
+  "initial" :> Get '[JSON] AST
+  -- "step" :> ReqBody '[JSON] AST :> Post '[JSON] (Headers '[Header "Access-Control-Allow-Origin" String] AST) :<|>
+  -- "initial" :> Get '[JSON] (Headers '[Header "Access-Control-Allow-Origin" String] AST) 
 
 
 -- * APP
@@ -34,49 +40,46 @@ run = do
 
 
 mkApp :: IO Application
-mkApp = return $ serve (Proxy :: Proxy AstAPI) server
-
-
-frontendUrl :: String 
-frontendUrl = "http://localhost:8080"
-
-
-stepWithHeader :: AST -> Handler (Headers '[Header "Access-Control-Allow-Origin" String] AST)
-stepWithHeader ast = addHeader frontendUrl <$> step ast
+mkApp = 
+  return $ 
+  cors (const $ Just policy) $
+  provideOptions (Proxy :: Proxy AstAPI) $
+  serve (Proxy :: Proxy AstAPI) server
   where 
-    step :: AST -> Handler AST 
-    step ast = return stepAST
+    policy = simpleCorsResourcePolicy 
+              { corsRequestHeaders = [ "content-type" ] 
+              , corsMethods = [ "GET", "POST"]
+              }
 
 
-initialWithHeader :: Handler (Headers '[Header "Access-Control-Allow-Origin" String] AST)
-initialWithHeader = addHeader frontendUrl <$> initial 
-  where 
-    initial :: Handler AST 
-    initial = return initialAST
+handlerStep :: AST -> Handler AST
+handlerStep ast = return $ Evaluator.step ast
+    
+    
+handlerInitial :: Handler AST
+handlerInitial = return initialAST
 
 
 server :: Server AstAPI
 server =
-  stepWithHeader :<|> initialWithHeader
+  handlerStep :<|> handlerInitial
+  -- stepWithHeader :<|> initialWithHeader
  
 
--- * Types 
-
-data AST = AST {
-    name :: Name,  
-    children :: [AST]
-} deriving (Eq, Show, Generic)
+-- frontendUrl :: String 
+-- frontendUrl = "locahhost:8080"
 
 
-instance ToJSON AST  
-instance FromJSON AST 
+-- stepWithHeader :: AST -> Handler (Headers '[Header "Access-Control-Allow-Origin" String] AST)
+-- stepWithHeader ast = addHeader frontendUrl <$> step ast
+--   where 
+--     step :: AST -> Handler AST 
+--     step ast = return stepAST
 
 
-initialAST :: AST 
-initialAST = AST "Node" []
+-- initialWithHeader :: Handler (Headers '[Header "Access-Control-Allow-Origin" String] AST)
+-- initialWithHeader = addHeader frontendUrl <$> initial 
+--   where 
+--     initial :: Handler AST 
+--     initial = return initialAST
 
-
-stepAST :: AST 
-stepAST = AST "STEPPPPPP" []
- 
-type Name = String 

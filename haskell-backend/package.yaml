@@ -29,7 +29,9 @@ dependencies:
   - base
   - servant
   - servant-server
+  - servant-options
   - transformers
   - aeson
   - wai
+  - wai-cors
   - warp

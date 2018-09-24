@@ -2,7 +2,7 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 1294ac80d49d12835b7badcdda0fb59897e148065987488704776d6420ba6dc7
+-- hash: 608bdd55788127f460154d7fb3c4008db14e1d1c8bee308eb74ceed77b2b7f7e
 
 name:           haskell-backend
 version:        0.0.0
@@ -12,6 +12,8 @@ cabal-version:  >= 1.10
 library
   exposed-modules:
       App
+      Evaluator
+      Types
   other-modules:
       Paths_haskell_backend
   hs-source-dirs:
@@ -21,9 +23,11 @@ library
       aeson
     , base
     , servant
+    , servant-options
     , servant-server
     , transformers
     , wai
+    , wai-cors
     , warp
   default-language: Haskell2010
 
@@ -37,8 +41,10 @@ executable haskell-backend
     , base
     , haskell-backend
     , servant
+    , servant-options
     , servant-server
     , transformers
     , wai
+    , wai-cors
     , warp
   default-language: Haskell2010

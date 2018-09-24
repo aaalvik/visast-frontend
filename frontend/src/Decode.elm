@@ -7,10 +7,12 @@ import Model exposing (AST, Children(..))
 
 ast : Decoder AST
 ast =
-    Decode.succeed
-        AST
-        |> required "name" string
-        |> required "children" children
+    Debug.log "Decoder::"
+        (Decode.succeed
+            AST
+            |> required "name" string
+            |> required "children" children
+        )
 
 
 children : Decoder Children
