@@ -9,8 +9,6 @@ module App where
 
 import Types 
 import Evaluator 
--- import Data.Aeson
--- import GHC.Generics
 import Network.Wai
 import Network.Wai.Handler.Warp
 import Servant
