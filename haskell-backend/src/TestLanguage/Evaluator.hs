@@ -1,7 +1,6 @@
-module Evaluator where 
+module TestLanguage.Evaluator where 
 
-import Types
-import Parser 
+import TestLanguage.TestTypes
 
 
 -- Evaluator for visualization. Returns a list of all evaluation steps 

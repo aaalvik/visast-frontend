@@ -1,7 +1,7 @@
-module Parser where
+module TestLanguage.Parser where
     
 import Data.Char
-import Types
+import TestLanguage.TestTypes
 
 
 parse :: String -> Expr 

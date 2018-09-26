@@ -1,4 +1,4 @@
-module Types where 
+module TestLanguage.TestTypes where 
 
 data Expr 
     = Num Int 

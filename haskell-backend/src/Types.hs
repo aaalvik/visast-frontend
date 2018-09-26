@@ -11,21 +11,20 @@ import GHC.Generics
 
 -- * Types 
 
-data AST = AST {
+data GenericAST = GenericAST {
     name :: Name,  
-    children :: [AST]
+    children :: [GenericAST]
 } deriving (Eq, Show, Generic)
 
 
-instance ToJSON AST  
-instance FromJSON AST 
+instance ToJSON GenericAST  
+instance FromJSON GenericAST 
 
-
-initialAST :: AST 
-initialAST = AST "Node" []
-
-
-stepAST :: AST 
-stepAST = AST "STEPPPPPP" []
- 
 type Name = String 
+
+
+data InputString = Input {
+    str :: String 
+} deriving (Eq, Show, Generic)
+
+instance FromJSON InputString 

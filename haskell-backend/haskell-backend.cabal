@@ -2,7 +2,7 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 608bdd55788127f460154d7fb3c4008db14e1d1c8bee308eb74ceed77b2b7f7e
+-- hash: 8042110742f2ba9739e04243487af78e0230f973bb470a63ba6ce2418ad01482
 
 name:           haskell-backend
 version:        0.0.0
@@ -12,7 +12,11 @@ cabal-version:  >= 1.10
 library
   exposed-modules:
       App
-      Evaluator
+      TestLanguage.Convert
+      TestLanguage.Evaluator
+      TestLanguage.Parser
+      TestLanguage.TestMain
+      TestLanguage.TestTypes
       Types
   other-modules:
       Paths_haskell_backend

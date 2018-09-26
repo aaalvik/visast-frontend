@@ -1,7 +1,7 @@
-module TestMain where 
+module TestLanguage.TestMain where 
 
-import Evaluator 
-import Parser 
+import TestLanguage.Evaluator 
+import TestLanguage.Parser 
 
 testMain = do 
     input <- getLine 

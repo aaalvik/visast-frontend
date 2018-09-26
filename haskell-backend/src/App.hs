@@ -8,7 +8,9 @@ module App where
 
 
 import Types 
-import Evaluator 
+import TestLanguage.Evaluator as Evaluator
+import TestLanguage.Parser as Parser 
+import TestLanguage.Convert as Convert 
 import Network.Wai
 import Network.Wai.Handler.Warp
 import Servant
@@ -18,11 +20,8 @@ import Network.Wai.Middleware.Servant.Options
 
 -- * API
 
-type AstAPI =
-  "step" :> ReqBody '[JSON] AST :> Post '[JSON] AST :<|>
-  "initial" :> Get '[JSON] AST
-  -- "step" :> ReqBody '[JSON] AST :> Post '[JSON] (Headers '[Header "Access-Control-Allow-Origin" String] AST) :<|>
-  -- "initial" :> Get '[JSON] (Headers '[Header "Access-Control-Allow-Origin" String] AST) 
+type GenericASTAPI =
+  "steps" :> ReqBody '[JSON] InputString :> Post '[JSON] [GenericAST]
 
 
 -- * APP
@@ -41,8 +40,8 @@ mkApp :: IO Application
 mkApp = 
   return $ 
   cors (const $ Just policy) $
-  provideOptions (Proxy :: Proxy AstAPI) $
-  serve (Proxy :: Proxy AstAPI) server
+  provideOptions (Proxy :: Proxy GenericASTAPI) $
+  serve (Proxy :: Proxy GenericASTAPI) server
   where 
     policy = simpleCorsResourcePolicy 
               { corsRequestHeaders = [ "content-type" ] 
@@ -50,34 +49,13 @@ mkApp =
               }
 
 
-handlerStep :: AST -> Handler AST
-handlerStep ast = return $ Evaluator.step ast
+handlerSteps :: InputString -> Handler [GenericAST]
+handlerSteps inputStr = do
+  let s = str inputStr 
+      startExpr = Parser.parse s
+      steps = Evaluator.eval startExpr 
+  return $ map Convert.toGeneric steps
     
-    
-handlerInitial :: Handler AST
-handlerInitial = return initialAST
 
-
-server :: Server AstAPI
-server =
-  handlerStep :<|> handlerInitial
-  -- stepWithHeader :<|> initialWithHeader
- 
-
--- frontendUrl :: String 
--- frontendUrl = "locahhost:8080"
-
-
--- stepWithHeader :: AST -> Handler (Headers '[Header "Access-Control-Allow-Origin" String] AST)
--- stepWithHeader ast = addHeader frontendUrl <$> step ast
---   where 
---     step :: AST -> Handler AST 
---     step ast = return stepAST
-
-
--- initialWithHeader :: Handler (Headers '[Header "Access-Control-Allow-Origin" String] AST)
--- initialWithHeader = addHeader frontendUrl <$> initial 
---   where 
---     initial :: Handler AST 
---     initial = return initialAST
-
+server :: Server GenericASTAPI
+server = handlerSteps
