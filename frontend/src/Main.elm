@@ -3,8 +3,9 @@ module Main exposing (..)
 import Browser
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import Html.Events exposing (onClick, onInput)
+import Html.Events exposing (keyCode, on, onClick, onInput)
 import Http exposing (Error(..), Response)
+import Json.Decode as Json
 import Model exposing (..)
 import Request
 import Step
@@ -32,6 +33,7 @@ type Msg
     | StepsReceived (Result Http.Error (List AST))
     | NextState
     | PreviousState
+    | KeyDown Int
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -88,6 +90,17 @@ update msg model =
         PreviousState ->
             ( Step.previousState model, Cmd.none )
 
+        KeyDown key ->
+            if key == 13 then
+                case model.input of
+                    Just str ->
+                        ( model, Request.parseAndGetSteps StepsReceived str )
+
+                    Nothing ->
+                        ( { model | currentAST = Err "Cannot parse empty expression" }, Cmd.none )
+            else
+                ( model, Cmd.none )
+
 
 errorToString err =
     case err of
@@ -143,6 +156,7 @@ textInput =
         [ class "input"
         , placeholder "Write expression here"
         , onInput UpdateInput
+        , onKeyDown KeyDown
         ]
         []
 
@@ -155,6 +169,11 @@ viewAST ast =
         |> div [ class "tree-container" ]
     ]
         |> div [ class "ast-container" ]
+
+
+onKeyDown : (Int -> msg) -> Attribute msg
+onKeyDown tagger =
+    on "keydown" (Json.map tagger keyCode)
 
 
 
