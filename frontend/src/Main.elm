@@ -12,7 +12,7 @@ import Tree
 
 init : ( Model, Cmd Msg )
 init =
-    ( { ast = Nothing }, Cmd.none )
+    ( { steps = Nothing, input = "+ 2 3" }, Cmd.none )
 
 
 
@@ -21,9 +21,8 @@ init =
 
 type Msg
     = NoOp
-    | GetInitialAST
-    | GetStepAST
-    | ASTReceived (Result Http.Error AST)
+    | ParseAndGetSteps
+    | StepsReceived (Result Http.Error (List AST))
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -32,23 +31,15 @@ update msg model =
         NoOp ->
             ( model, Cmd.none )
 
-        GetInitialAST ->
-            ( model, Request.getInitialAST ASTReceived )
+        ParseAndGetSteps ->
+            ( model, Request.parseAndGetSteps StepsReceived model.input )
 
-        GetStepAST ->
-            case model.ast of
-                Just ast ->
-                    ( model, Request.getStepAST ASTReceived ast )
-
-                Nothing ->
-                    ( model, Cmd.none )
-
-        ASTReceived result ->
+        StepsReceived result ->
             case result of
-                Ok ast ->
+                Ok steps ->
                     let
                         newModel =
-                            { model | ast = Just ast }
+                            { model | steps = Just steps }
                     in
                     ( newModel, Cmd.none )
 
@@ -86,20 +77,22 @@ view : Model -> Html Msg
 view model =
     div []
         [ h1 [] [ text "Current AST" ]
-        , viewAST model.ast
-        , button [ onClick GetInitialAST ] [ text "Get initial AST" ]
-        , button [ onClick GetStepAST ] [ text "Step" ]
+        , viewAST model.steps
+        , button [ onClick ParseAndGetSteps ] [ text "Parse" ]
         ]
 
 
-viewAST : Maybe AST -> Html Msg
-viewAST maybeAST =
-    [ case maybeAST of
+viewAST : Maybe (List AST) -> Html Msg
+viewAST maybeSteps =
+    [ case maybeSteps of
         Nothing ->
             text "No tree"
 
-        Just ast ->
+        Just (ast :: rest) ->
             Tree.drawTree ast
+
+        Just [] ->
+            text "Empty list of steps"
     ]
         |> div [ class "tree-container" ]
 

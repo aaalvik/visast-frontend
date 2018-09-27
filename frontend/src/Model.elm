@@ -2,7 +2,9 @@ module Model exposing (..)
 
 
 type alias Model =
-    { ast : Maybe AST }
+    { steps : Maybe (List AST)
+    , input : String
+    }
 
 
 type alias Name =

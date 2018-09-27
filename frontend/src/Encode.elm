@@ -1,4 +1,4 @@
-module Encode exposing (ast)
+module Encode exposing (ast, input)
 
 import Json.Encode as Encode
 import Model exposing (AST, Children(..))
@@ -19,3 +19,9 @@ children ch =
             ch
     in
     Encode.list ast childList
+
+
+input : String -> Encode.Value
+input str =
+    Encode.object
+        [ ( "str", Encode.string str ) ]
