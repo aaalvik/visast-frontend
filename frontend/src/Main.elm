@@ -1,18 +1,25 @@
 module Main exposing (..)
 
 import Browser
-import Html exposing (Html, button, div, h1, img, text)
-import Html.Attributes exposing (class, src)
-import Html.Events exposing (onClick)
+import Html exposing (..)
+import Html.Attributes exposing (..)
+import Html.Events exposing (onClick, onInput)
 import Http exposing (Error(..), Response)
 import Model exposing (..)
 import Request
+import Step
 import Tree
 
 
 init : ( Model, Cmd Msg )
 init =
-    ( { steps = Nothing, input = "+ 2 3" }, Cmd.none )
+    ( { currentAST = Err ""
+      , nextSteps = Nothing
+      , previousSteps = Nothing
+      , input = Nothing
+      }
+    , Cmd.none
+    )
 
 
 
@@ -20,31 +27,66 @@ init =
 
 
 type Msg
-    = NoOp
+    = UpdateInput String
     | ParseAndGetSteps
     | StepsReceived (Result Http.Error (List AST))
+    | NextState
+    | PreviousState
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        NoOp ->
-            ( model, Cmd.none )
+        UpdateInput str ->
+            ( { model
+                | input =
+                    if String.isEmpty str then
+                        Nothing
+                    else
+                        Just str
+              }
+            , Cmd.none
+            )
 
         ParseAndGetSteps ->
-            ( model, Request.parseAndGetSteps StepsReceived model.input )
+            case model.input of
+                Just str ->
+                    ( model, Request.parseAndGetSteps StepsReceived str )
+
+                Nothing ->
+                    ( { model | currentAST = Err "Cannot parse empty expression" }, Cmd.none )
 
         StepsReceived result ->
             case result of
-                Ok steps ->
+                Ok (ast :: next) ->
                     let
+                        currentAST =
+                            Ok ast
+
+                        nextSteps =
+                            Just next
+
+                        previousSteps =
+                            Just []
+
                         newModel =
-                            { model | steps = Just steps }
+                            { model | currentAST = currentAST, nextSteps = nextSteps, previousSteps = previousSteps }
                     in
                     ( newModel, Cmd.none )
 
+                Ok [] ->
+                    Debug.log "Received empty list of steps"
+                        ( { model | currentAST = Err "Received empty list of steps" }, Cmd.none )
+
                 Err err ->
-                    Debug.log ("Received error: " ++ errorToString err) ( model, Cmd.none )
+                    Debug.log ("Received error: " ++ errorToString err)
+                        ( { model | currentAST = Err <| "Received error: " ++ errorToString err }, Cmd.none )
+
+        NextState ->
+            ( Step.nextState model, Cmd.none )
+
+        PreviousState ->
+            ( Step.previousState model, Cmd.none )
 
 
 errorToString err =
@@ -75,26 +117,44 @@ responseToString res =
 
 view : Model -> Html Msg
 view model =
-    div []
-        [ h1 [] [ text "Current AST" ]
-        , viewAST model.steps
-        , button [ onClick ParseAndGetSteps ] [ text "Parse" ]
+    div [ class "page" ] [ viewContent model ]
+
+
+viewContent : Model -> Html Msg
+viewContent model =
+    div [ class "content" ]
+        [ div [ class "top-container" ]
+            [ [ textInput
+              , div [ class "buttons" ]
+                    [ button [ class "button btn", onClick ParseAndGetSteps ] [ text "Parse" ]
+                    , button [ class "button btn", onClick PreviousState ] [ text "Previous" ]
+                    , button [ class "button btn", onClick NextState ] [ text "Next" ]
+                    ]
+              ]
+                |> div [ class "input-container" ]
+            ]
+        , viewAST model.currentAST
         ]
 
 
-viewAST : Maybe (List AST) -> Html Msg
-viewAST maybeSteps =
-    [ case maybeSteps of
-        Nothing ->
-            text "No tree"
+textInput : Html Msg
+textInput =
+    input
+        [ class "input"
+        , placeholder "Write expression here"
+        , onInput UpdateInput
+        ]
+        []
 
-        Just (ast :: rest) ->
-            Tree.drawTree ast
 
-        Just [] ->
-            text "Empty list of steps"
-    ]
+viewAST : Result String AST -> Html Msg
+viewAST ast =
+    [ --viewEnv model.currentEnv
+      --  |> div [ class "env" ]
+      [ Tree.drawTree ast ]
         |> div [ class "tree-container" ]
+    ]
+        |> div [ class "ast-container" ]
 
 
 

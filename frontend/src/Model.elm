@@ -2,8 +2,10 @@ module Model exposing (..)
 
 
 type alias Model =
-    { steps : Maybe (List AST)
-    , input : String
+    { currentAST : Result String AST
+    , nextSteps : Maybe (List AST)
+    , previousSteps : Maybe (List AST)
+    , input : Maybe String
     }
 
 

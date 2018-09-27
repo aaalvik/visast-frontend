@@ -1,15 +1,98 @@
-body {
-  font-family: 'Source Sans Pro', 'Trebuchet MS', 'Lucida Grande', 'Bitstream Vera Sans', 'Helvetica Neue', sans-serif;
-  margin: 0;
+/*@import '~bootstrap-sass/assets/stylesheets/bootstrap/_mixins.scss';
+@import '~bootstrap-sass/assets/stylesheets/_bootstrap.scss';
+*/
+
+.page {
+  --lighter: #6bc2b5;
+  --light: #128277;
+  --dark: #004D47;
+  /* Usage: color: var(--lighter); */
+
+  font-family: 'Muli';
+  font-size: 18px;
+  font-weight: 300;
+  padding: 2rem;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.content {
+  display: flex;
+  justify-content: flex-start;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+}
+
+.tree-container {
+  width: 100%;
+  height: 100%;
+  margin-top: 3rem;
+  font-weight: 500;
   text-align: center;
-  color: #293c4b;
+  overflow-x: scroll;
+  overflow-y: scroll;
 }
 
-h1 {
-  font-size: 30px;
+.ast-container {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  height: 100%;
+  overflow-x: scroll;
+  overflow-y: scroll;
 }
 
-img {
-  margin: 20px 0;
-  max-width: 200px;
+.top-container {
+  display: flex; 
+  align-items: center; 
+  flex-direction: column;
+  background-color: var(--lighter);
+  padding: 2rem;
+}
+
+.input {
+  font-family: 'Muli';
+  font-weight: 300;
+  font-size: 16px;
+  border: solid 1px white;
+  padding-left: 1rem;
+  min-height: 40px;
+  width: 50%;
+}
+.input:focus { outline: none; }
+.input:active { outline: none; }
+
+.input-container {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  width: 100%;
+  margin-bottom: 2rem;
+}
+
+.button {
+  font: inherit;
+  font-size: 16px;
+  cursor: pointer;
+  -webkit-appearance: button;
+  color: white;
+  margin-left: 0.5rem;
+  background-color: var(--light);
+  outline: none;
+  height: 35px;
+  width: 80px;
+  border-radius: 0;
+}
+
+.buttons {
+  margin-top: 1rem;
+}
+
+.button:focus { outline: none; color: white;}
+.button:active { outline: none; color: white; }
+.button:hover { 
+  background-color: var(--dark);
+  color: white;
 }
