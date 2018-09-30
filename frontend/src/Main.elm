@@ -137,14 +137,12 @@ viewContent : Model -> Html Msg
 viewContent model =
     div [ class "content" ]
         [ div [ class "top-container" ]
-            [ [ textInput
-              , div [ class "buttons" ]
-                    [ button [ class "button btn", onClick ParseAndGetSteps ] [ text "Parse" ]
-                    , button [ class "button btn", onClick PreviousState ] [ text "Previous" ]
-                    , button [ class "button btn", onClick NextState ] [ text "Next" ]
-                    ]
-              ]
-                |> div [ class "input-container" ]
+            [ [ textInput ] |> div [ class "input-container" ]
+            , div [ class "buttons" ]
+                [ button [ class "button btn", onClick ParseAndGetSteps ] [ text "Parse" ]
+                , button [ class "button btn", onClick PreviousState ] [ text "Previous" ]
+                , button [ class "button btn", onClick NextState ] [ text "Next" ]
+                ]
             ]
         , viewAST model.currentAST
         ]
@@ -163,9 +161,7 @@ textInput =
 
 viewAST : Result String AST -> Html Msg
 viewAST ast =
-    [ --viewEnv model.currentEnv
-      --  |> div [ class "env" ]
-      [ Tree.drawTree ast ]
+    [ [ Tree.drawTree ast ]
         |> div [ class "tree-container" ]
     ]
         |> div [ class "ast-container" ]

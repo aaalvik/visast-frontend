@@ -51,4 +51,4 @@ parseExpr ("if":xs) =
         _ -> 
             error "parseExpr error: if-expression lacks then/else keyword"
 
-parseExpr _ = error "parseExpr error: expression doesn't match any rules"
+parseExpr e = error $ "parseExpr error: expression doesn't match any rules" ++ show e
