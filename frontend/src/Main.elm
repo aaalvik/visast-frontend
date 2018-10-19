@@ -77,11 +77,11 @@ update msg model =
                     ( newModel, Cmd.none )
 
                 Ok [] ->
-                    Debug.log "Received empty list of steps"
+                    --Debug.log "Received empty list of steps"
                         ( { model | currentAST = Err "Received empty list of steps" }, Cmd.none )
 
                 Err err ->
-                    Debug.log ("Received error: " ++ errorToString err)
+                    --Debug.log ("Received error: " ++ errorToString err)
                         ( { model | currentAST = Err <| "Received error: " ++ errorToString err }, Cmd.none )
 
         NextState ->
