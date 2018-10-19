@@ -1,1 +1,1 @@
-web: elm-app start
+web: PORT=8080 elm-app start
