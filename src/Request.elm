@@ -7,7 +7,9 @@ import Http
 
 globalUrl : String
 globalUrl =
-    "http://localhost:3000"
+    let portStr = "3000" 
+    in
+    "https://visast-api.herokuapp.com/" ++ portStr 
 
 
 parseAndGetSteps msg inputStr =
