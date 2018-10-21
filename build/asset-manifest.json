@@ -1,11 +1,11 @@
 {
-  "main.css": "/static/css/main.4542d154.chunk.css",
-  "main.js": "/static/js/main.29a13829.chunk.js",
-  "main.css.map": "/static/css/main.4542d154.chunk.css.map",
-  "main.js.map": "/static/js/main.29a13829.chunk.js.map",
-  "vendors~main.js": "/static/js/vendors~main.f8b4eb45.chunk.js",
-  "vendors~main.js.map": "/static/js/vendors~main.f8b4eb45.chunk.js.map",
-  "runtime~main.js": "/static/js/runtime~main.004f827c.js",
-  "runtime~main.js.map": "/static/js/runtime~main.004f827c.js.map",
+  "main.css": "/static/css/main.bdee28ab.chunk.css",
+  "main.js": "/static/js/main.64771fbc.chunk.js",
+  "main.css.map": "/static/css/main.bdee28ab.chunk.css.map",
+  "main.js.map": "/static/js/main.64771fbc.chunk.js.map",
+  "runtime~main.js": "/static/js/runtime~main.d53d57e4.js",
+  "runtime~main.js.map": "/static/js/runtime~main.d53d57e4.js.map",
+  "vendors~main.js": "/static/js/vendors~main.7b45496b.chunk.js",
+  "vendors~main.js.map": "/static/js/vendors~main.7b45496b.chunk.js.map",
   "index.html": "/index.html"
 }
