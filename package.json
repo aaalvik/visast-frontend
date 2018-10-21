@@ -3,5 +3,7 @@
     "devDependencies": {
         "create-elm-app": "^2.2.0"
     },
-    "build": "elm-app build"
+    "scripts": {
+        "build": "elm-app build"
+    }
 }
