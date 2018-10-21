@@ -9,7 +9,7 @@ globalUrl : String
 globalUrl =
     let portStr = "3000" 
     in
-    "https://visast-api.herokuapp.com/" ++ portStr 
+    "https://visast-api.herokuapp.com:" ++ portStr 
 
 
 parseAndGetSteps msg inputStr =
