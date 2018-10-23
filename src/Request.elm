@@ -7,9 +7,7 @@ import Http
 
 globalUrl : String
 globalUrl =
-    let portStr = "3000" 
-    in
-    "https://visast-api.herokuapp.com:" ++ portStr 
+    "http://visast-api.herokuapp.com"
 
 
 parseAndGetSteps msg inputStr =
