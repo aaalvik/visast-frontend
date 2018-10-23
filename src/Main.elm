@@ -19,6 +19,7 @@ init =
       , previousSteps = Nothing
       , input = Nothing
       , viewMode = Initial 
+      , key = Nothing 
       }
     , Cmd.none
     )
@@ -29,7 +30,8 @@ init =
 
 
 type Msg
-    = UpdateInput String
+    = UpdateInputExpr String
+    | UpdateInputKey String
     | ParseAndGetSteps
     | StepsReceived (Result Http.Error (List AST))
     | NextState
@@ -41,7 +43,7 @@ type Msg
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        UpdateInput str ->
+        UpdateInputExpr str ->
             ( { model
                 | input =
                     if String.isEmpty str then
@@ -51,6 +53,17 @@ update msg model =
               }
             , Cmd.none
             )
+        
+        UpdateInputKey key -> 
+            ( { model
+                | key =
+                    if String.isEmpty key then
+                        Nothing
+                    else
+                        Just key
+              }
+            , Cmd.none
+            )         
 
         ParseAndGetSteps ->
             case model.input of
@@ -138,8 +151,8 @@ view model =
     let 
         viewFunction = case model.viewMode of 
             Initial -> viewInitial
-            Advanced -> viewAdvancedContent
-            Test -> viewTestContent
+            Advanced -> viewAdvanced
+            Test -> viewTest
     in 
     div [ class "page" ] [ viewFunction model ]
 
@@ -152,10 +165,7 @@ viewTitle =
 viewInitial : Model -> Html Msg 
 viewInitial model = 
     div [ class "content" ] 
-        [ div [ class "top-container" ] 
-            [ viewTitle
-            , div [ class "white"] [ text "Velg modus:"]
-            ] 
+        [ div [ class "top-container" ] [ viewTitle] 
         , div [ class "bottom-container"] 
             [ div [class "big-button--container"] [
                 button [ class "button btn big-button", onClick <| ChangeMode Test] [ text "Bli kjent"]
@@ -169,17 +179,28 @@ viewInitial model =
         ]
 
 
-viewAdvancedContent : Model -> Html Msg 
-viewAdvancedContent model = 
-    div [ class "content" ] [ div [ class "top-container" ] [ text "CUSTOM MODE"]]
-
-
-
-viewTestContent : Model -> Html Msg
-viewTestContent model =
+viewAdvanced : Model -> Html Msg 
+viewAdvanced model = 
     div [ class "content" ]
         [ div [ class "top-container" ]
-            [ [ textInput ] |> div [ class "input-container" ]
+            [ div [ class "input-container" ] 
+                [ textInput "Write expression here" UpdateInputExpr
+                , textInput "Brukernavn - abc123" UpdateInputKey
+                ]
+            , div [ class "buttons" ]
+                [ button [ class "button btn", onClick ParseAndGetSteps ] [ text "Parse" ]
+                , button [ class "button btn", onClick PreviousState ] [ text "Previous" ]
+                , button [ class "button btn", onClick NextState ] [ text "Next" ]
+                ]
+            ]
+        , viewAST model.currentAST
+        ]
+
+viewTest : Model -> Html Msg
+viewTest model =
+    div [ class "content" ]
+        [ div [ class "top-container" ]
+            [ div [ class "input-container" ] [ textInput "Skriv uttrykk her (feks. + 4 58)" UpdateInputExpr ]
             , div [ class "buttons" ]
                 [ button [ class "button btn", onClick ParseAndGetSteps ] [ text "Parse" ]
                 , button [ class "button btn", onClick PreviousState ] [ text "Previous" ]
@@ -190,12 +211,12 @@ viewTestContent model =
         ]
 
 
-textInput : Html Msg
-textInput =
+--textInput : String -> (String -> Msg) -> Html Msg
+textInput str msg =
     input
         [ class "input"
-        , placeholder "Write expression here"
-        , onInput UpdateInput
+        , placeholder str
+        , onInput msg
         , onKeyDown KeyDown
         ]
         []

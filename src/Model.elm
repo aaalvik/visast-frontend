@@ -7,6 +7,7 @@ type alias Model =
     , previousSteps : Maybe (List AST)
     , input : Maybe String
     , viewMode : ViewMode 
+    , key : Maybe String 
     }
 
 
