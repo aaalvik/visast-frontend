@@ -6,6 +6,7 @@ type alias Model =
     , nextSteps : Maybe (List AST)
     , previousSteps : Maybe (List AST)
     , input : Maybe String
+    , viewMode : ViewMode 
     }
 
 
@@ -21,3 +22,6 @@ type alias AST =
 
 type Children
     = Children (List AST)
+
+
+type ViewMode = Initial | Advanced | Test 

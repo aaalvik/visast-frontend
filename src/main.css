@@ -29,6 +29,7 @@ body {
   display: flex;
   justify-content: flex-start;
   flex-direction: column;
+  align-items: center;
   height: 100%;
   width: 100%;
 }
@@ -51,6 +52,24 @@ body {
   overflow-y: scroll;
 }
 
+.bottom-container {
+  display: flex; 
+  justify-content: space-around;
+  width: 50%;
+  min-height: 250px;
+  padding-top: 40px;
+}
+
+.title {
+  color: white;
+  font-size: 60px;
+  font-weight: 600;
+}
+
+.white {
+  color: white;
+}
+
 .tree {
   background-color: white;
   display: flex;
@@ -66,6 +85,7 @@ body {
 .top-container {
   display: flex; 
   align-items: center; 
+  width: 100%;
   flex-direction: column;
   background-color: var(--lighter);
   padding: 20px;
@@ -112,4 +132,23 @@ body {
 .button:hover { 
   background-color: var(--dark);
   color: white;
+}
+
+.big-button {
+  font-size: 40px;
+  height: 100px;
+  width: 250px;
+  margin: 30px;
+}
+
+.big-button--container {
+  display: flex;
+  flex-direction: column;
+  width: 45%;
+  align-items: center;
+}
+
+.big-button--text {
+  width: 90%;
+  text-align: center;
 }

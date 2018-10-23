@@ -18,6 +18,7 @@ init =
       , nextSteps = Nothing
       , previousSteps = Nothing
       , input = Nothing
+      , viewMode = Initial 
       }
     , Cmd.none
     )
@@ -34,6 +35,7 @@ type Msg
     | NextState
     | PreviousState
     | KeyDown Int
+    | ChangeMode ViewMode 
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -101,6 +103,9 @@ update msg model =
             else
                 ( model, Cmd.none )
 
+        ChangeMode newMode -> 
+            ( { model | viewMode = newMode }, Cmd.none )
+
 
 errorToString err =
     case err of
@@ -130,11 +135,48 @@ responseToString res =
 
 view : Model -> Html Msg
 view model =
-    div [ class "page" ] [ viewContent model ]
+    let 
+        viewFunction = case model.viewMode of 
+            Initial -> viewInitial
+            Advanced -> viewAdvancedContent
+            Test -> viewTestContent
+    in 
+    div [ class "page" ] [ viewFunction model ]
 
 
-viewContent : Model -> Html Msg
-viewContent model =
+viewTitle : Html Msg 
+viewTitle = 
+    div [class "title"] [ text "VisAST"]
+
+
+viewInitial : Model -> Html Msg 
+viewInitial model = 
+    div [ class "content" ] 
+        [ div [ class "top-container" ] 
+            [ viewTitle
+            , div [ class "white"] [ text "Velg modus:"]
+            ] 
+        , div [ class "bottom-container"] 
+            [ div [class "big-button--container"] [
+                button [ class "button btn big-button", onClick <| ChangeMode Test] [ text "Bli kjent"]
+                , div [class "big-button--text"] [text "Bli kjent med programmet uten å ha skrevet noe kode."]
+            ]
+            , div [ class "big-button--container"] [
+                button [ class "button btn big-button", onClick <| ChangeMode Advanced ] [ text "Avansert"]
+                , div [class "big-button--text"] [text "Visualiser ved hjelp av din egen evalueringsfunksjon!"]
+            ]
+            ]
+        ]
+
+
+viewAdvancedContent : Model -> Html Msg 
+viewAdvancedContent model = 
+    div [ class "content" ] [ div [ class "top-container" ] [ text "CUSTOM MODE"]]
+
+
+
+viewTestContent : Model -> Html Msg
+viewTestContent model =
     div [ class "content" ]
         [ div [ class "top-container" ]
             [ [ textInput ] |> div [ class "input-container" ]
