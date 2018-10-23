@@ -7,7 +7,7 @@ import Http
 
 globalUrl : String
 globalUrl =
-    "http://visast-api.herokuapp.com"
+    "https://visast-api.herokuapp.com"
 
 
 parseAndGetSteps msg inputStr =
