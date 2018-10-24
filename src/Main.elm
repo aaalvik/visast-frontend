@@ -1,4 +1,4 @@
-module Main exposing (..)
+module Main exposing (Msg(..), errorToString, init, main, onKeyDown, responseToString, textInput, update, view, viewAST, viewBottom, viewLeftMenu, viewTitle, viewTop)
 
 import Browser
 import Html exposing (..)
@@ -18,8 +18,8 @@ init =
       , nextSteps = Nothing
       , previousSteps = Nothing
       , input = Nothing
-      , viewMode = Initial 
-      , key = Nothing 
+      , viewMode = Initial
+      , key = Nothing
       }
     , Cmd.none
     )
@@ -37,7 +37,7 @@ type Msg
     | NextState
     | PreviousState
     | KeyDown Int
-    | ChangeMode ViewMode 
+    | ChangeMode ViewMode
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -48,22 +48,24 @@ update msg model =
                 | input =
                     if String.isEmpty str then
                         Nothing
+
                     else
                         Just str
               }
             , Cmd.none
             )
-        
-        UpdateInputKey key -> 
+
+        UpdateInputKey key ->
             ( { model
                 | key =
                     if String.isEmpty key then
                         Nothing
+
                     else
                         Just key
               }
             , Cmd.none
-            )         
+            )
 
         ParseAndGetSteps ->
             case model.input of
@@ -93,11 +95,11 @@ update msg model =
 
                 Ok [] ->
                     --Debug.log "Received empty list of steps"
-                        ( { model | currentAST = Err "Received empty list of steps" }, Cmd.none )
+                    ( { model | currentAST = Err "Received empty list of steps" }, Cmd.none )
 
                 Err err ->
                     --Debug.log ("Received error: " ++ errorToString err)
-                        ( { model | currentAST = Err <| "Received error: " ++ errorToString err }, Cmd.none )
+                    ( { model | currentAST = Err <| "Received error: " ++ errorToString err }, Cmd.none )
 
         NextState ->
             ( Step.nextState model, Cmd.none )
@@ -113,10 +115,11 @@ update msg model =
 
                     Nothing ->
                         ( { model | currentAST = Err "Cannot parse empty expression" }, Cmd.none )
+
             else
                 ( model, Cmd.none )
 
-        ChangeMode newMode -> 
+        ChangeMode newMode ->
             ( { model | viewMode = newMode }, Cmd.none )
 
 
@@ -148,44 +151,23 @@ responseToString res =
 
 view : Model -> Html Msg
 view model =
-    let 
-        viewFunction = case model.viewMode of 
-            Initial -> viewInitial
-            Advanced -> viewAdvanced
-            Test -> viewTest
-    in 
-    div [ class "page" ] [ viewFunction model ]
-
-
-viewTitle : Html Msg 
-viewTitle = 
-    div [class "title"] [ text "VisAST"]
-
-
-viewInitial : Model -> Html Msg 
-viewInitial model = 
-    div [ class "content" ] 
-        [ div [ class "top-container" ] [ viewTitle] 
-        , div [ class "bottom-container"] 
-            [ div [class "big-button--container"] [
-                button [ class "button btn big-button", onClick <| ChangeMode Test] [ text "Bli kjent"]
-                , div [class "big-button--text"] [text "Bli kjent med programmet uten å ha skrevet noe kode."]
-            ]
-            , div [ class "big-button--container"] [
-                button [ class "button btn big-button", onClick <| ChangeMode Advanced ] [ text "Avansert"]
-                , div [class "big-button--text"] [text "Visualiser ved hjelp av din egen evalueringsfunksjon!"]
-            ]
+    div [ class "page" ]
+        [ div [ class "content" ]
+            [ div [ class "top-container" ] <| viewTop model
+            , viewBottom model
             ]
         ]
 
 
-viewAdvanced : Model -> Html Msg 
-viewAdvanced model = 
-    div [ class "content" ]
-        [ div [ class "top-container" ]
-            [ div [ class "input-container" ] 
-                [ textInput "Write expression here" UpdateInputExpr
-                , textInput "Brukernavn - abc123" UpdateInputKey
+viewTop : Model -> List (Html Msg)
+viewTop model =
+    case model.viewMode of
+        Initial ->
+            [ viewTitle ]
+
+        _ ->
+            [ div [ class "input-container" ]
+                [ textInput "Skriv uttrykk her" "expr-input" UpdateInputExpr
                 ]
             , div [ class "buttons" ]
                 [ button [ class "button btn", onClick ParseAndGetSteps ] [ text "Parse" ]
@@ -193,28 +175,62 @@ viewAdvanced model =
                 , button [ class "button btn", onClick NextState ] [ text "Next" ]
                 ]
             ]
-        , viewAST model.currentAST
-        ]
 
-viewTest : Model -> Html Msg
-viewTest model =
-    div [ class "content" ]
-        [ div [ class "top-container" ]
-            [ div [ class "input-container" ] [ textInput "Skriv uttrykk her (feks. + 4 58)" UpdateInputExpr ]
-            , div [ class "buttons" ]
-                [ button [ class "button btn", onClick ParseAndGetSteps ] [ text "Parse" ]
-                , button [ class "button btn", onClick PreviousState ] [ text "Previous" ]
-                , button [ class "button btn", onClick NextState ] [ text "Next" ]
+
+viewBottom : Model -> Html Msg
+viewBottom model =
+    case model.viewMode of
+        Initial ->
+            [ div [ class "big-button--container" ]
+                [ button [ class "button btn big-button", onClick <| ChangeMode Test ] [ text "Bli kjent" ]
+                , div [ class "big-button--text" ] [ text "Bli kjent med programmet uten å ha skrevet noe kode." ]
                 ]
+            , div [ class "big-button--container" ]
+                [ button [ class "button btn big-button", onClick <| ChangeMode Advanced ] [ text "Avansert" ]
+                , div [ class "big-button--text" ] [ text "Visualiser ved hjelp av din egen evalueringsfunksjon!" ]
+                ]
+            ] |> div [ class "bottom-container" ]
+
+        _ ->
+            div [ class "ast-container" ]
+            [ viewLeftMenu model
+            , viewAST model.currentAST
             ]
-        , viewAST model.currentAST
+
+viewTitle : Html Msg
+viewTitle =
+    div [ class "title" ] [ text "VisAST" ]
+
+
+viewLeftMenu : Model -> Html Msg
+viewLeftMenu model =
+    div [ class "left-menu" ] <|
+        (case model.viewMode of 
+            Advanced -> 
+                [ div [ class "key-container" ]
+                [ strong [] [ text "Brukernavn: " ]
+                , textInput "abc123" "key-input" UpdateInputKey
+                ]]
+            _ -> []
+        )
+        ++ 
+        [ div [ class "grammar-container" ]
+            [ strong [] [ text "Grammatikk: " ]
+            , p [ class "code-font"] [ text "S -> * S S" ]
+            , ul [ class "grammar-list code-font"] 
+                [ li [] [ text "| + S S" ]
+                , li [] [ text "| - S" ]
+                , li [] [ text "| if S then S else S" ]
+                , li [] [ text "| number" ]
+            ]
+            ]
         ]
 
 
---textInput : String -> (String -> Msg) -> Html Msg
-textInput str msg =
+textInput : String -> String -> (String -> Msg) -> Html Msg
+textInput str className msg =
     input
-        [ class "input"
+        [ class <| "input " ++ className
         , placeholder str
         , onInput msg
         , onKeyDown KeyDown
@@ -224,10 +240,9 @@ textInput str msg =
 
 viewAST : Result String AST -> Html Msg
 viewAST ast =
-    [ [ Tree.drawTree ast ]
+    [ Tree.drawTree ast ]
         |> div [ class "tree-container" ]
-    ]
-        |> div [ class "ast-container" ]
+    
 
 
 onKeyDown : (Int -> msg) -> Attribute msg
