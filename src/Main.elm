@@ -14,7 +14,7 @@ import Tree
 
 init : ( Model, Cmd Msg )
 init =
-    ( { currentAST = Err ""
+    ( { currentAST = Err "" -- TODO change to "Initial" and fix other problems 
       , nextSteps = Nothing
       , previousSteps = Nothing
       , input = Nothing
@@ -94,11 +94,9 @@ update msg model =
                     ( newModel, Cmd.none )
 
                 Ok [] ->
-                    --Debug.log "Received empty list of steps"
                     ( { model | currentAST = Err "Received empty list of steps" }, Cmd.none )
 
                 Err err ->
-                    --Debug.log ("Received error: " ++ errorToString err)
                     ( { model | currentAST = Err <| "Received error: " ++ errorToString err }, Cmd.none )
 
         NextState ->
@@ -108,19 +106,41 @@ update msg model =
             ( Step.previousState model, Cmd.none )
 
         KeyDown key ->
-            if key == 13 then
-                case model.input of
+            if key == 13 then enterButtonPressed model 
+            else
+                ( model, Cmd.none )
+
+        ChangeMode newMode ->
+            ( { model | viewMode = newMode }, Cmd.none )
+
+
+enterButtonPressed : Model -> (Model, Cmd Msg)
+enterButtonPressed model = 
+    case model.viewMode of 
+        Initial -> 
+            ( model, Cmd.none )
+
+        Advanced -> 
+            case model.key of 
+                Just keyStr -> 
+                    if validKey keyStr then 
+                        (model, Request.getStepsFromStudent StepsReceived keyStr)
+                    else (model, Cmd.none)
+
+                Nothing -> 
+                    (model, Cmd.none)
+
+        Test -> 
+            case model.input of
                     Just str ->
                         ( model, Request.parseAndGetSteps StepsReceived str )
 
                     Nothing ->
                         ( { model | currentAST = Err "Cannot parse empty expression" }, Cmd.none )
 
-            else
-                ( model, Cmd.none )
-
-        ChangeMode newMode ->
-            ( { model | viewMode = newMode }, Cmd.none )
+        
+validKey : String -> Bool 
+validKey _ = True -- TODO implement for input validation      
 
 
 errorToString err =
@@ -165,7 +185,10 @@ viewTop model =
         Initial ->
             [ viewTitle ]
 
-        _ ->
+        Advanced -> 
+            [ viewTitle ]
+
+        Test ->
             [ div [ class "input-container" ]
                 [ textInput "Skriv uttrykk her" "expr-input" UpdateInputExpr
                 ]
@@ -191,11 +214,31 @@ viewBottom model =
                 ]
             ] |> div [ class "bottom-container" ]
 
-        _ ->
+        Advanced -> 
+            viewBottomAdvanced model 
+
+        Test ->
             div [ class "ast-container" ]
             [ viewLeftMenu model
             , viewAST model.currentAST
             ]
+
+
+viewBottomAdvanced : Model -> Html Msg 
+viewBottomAdvanced model = case model.currentAST of 
+    Err _ -> 
+        div [ class "ast-container" ]
+            [ div [ class "advanced-entry"]
+               [ strong [] [ text "Oppgi brukernavn for å starte"]
+                , textInput "abc123" "key-input" UpdateInputKey 
+               ]
+            ]
+    Ok ast -> 
+        div [ class "ast-container" ]
+            [ --viewLeftMenu model
+             viewAST model.currentAST
+            ]
+
 
 viewTitle : Html Msg
 viewTitle =
@@ -205,15 +248,6 @@ viewTitle =
 viewLeftMenu : Model -> Html Msg
 viewLeftMenu model =
     div [ class "left-menu" ] <|
-        (case model.viewMode of 
-            Advanced -> 
-                [ div [ class "key-container" ]
-                [ strong [] [ text "Brukernavn: " ]
-                , textInput "abc123" "key-input" UpdateInputKey
-                ]]
-            _ -> []
-        )
-        ++ 
         [ div [ class "grammar-container" ]
             [ strong [] [ text "Grammatikk: " ]
             , p [ class "code-font"] [ text "S -> * S S" ]

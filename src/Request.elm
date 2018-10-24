@@ -1,4 +1,4 @@
-module Request exposing (parseAndGetSteps)
+module Request exposing (parseAndGetSteps, getStepsFromStudent)
 
 import Decode
 import Encode
@@ -23,6 +23,16 @@ parseAndGetSteps msg inputStr =
     in
     Http.send msg request
 
+
+getStepsFromStudent msg keyStr = 
+    let 
+        url = 
+            globalUrl ++ "/getStepsFromStudent?studentKey=" ++ keyStr
+        
+        request = 
+            Http.get url Decode.steps
+    in
+    Http.send msg request 
 
 
 -- getInitialAST msg =
