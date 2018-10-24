@@ -186,7 +186,16 @@ viewTop model =
             [ viewTitle ]
 
         Advanced -> 
-            [ viewTitle ]
+            [ viewTitle ] ++ (
+                case model.currentAST of 
+                    Err _ -> [] 
+                    Ok _ -> 
+                        [ div [ class "buttons" ]
+                            [ button [ class "button btn", onClick PreviousState ] [ text "Previous" ]
+                            , button [ class "button btn", onClick NextState ] [ text "Next" ]
+                            ] 
+                        ]
+            )
 
         Test ->
             [ div [ class "input-container" ]
@@ -229,8 +238,8 @@ viewBottomAdvanced model = case model.currentAST of
     Err _ -> 
         div [ class "ast-container" ]
             [ div [ class "advanced-entry"]
-               [ strong [] [ text "Oppgi brukernavn for å starte"]
-                , textInput "abc123" "key-input" UpdateInputKey 
+                [ textInput "abc123" "key-input" UpdateInputKey 
+                , strong [] [ text "Oppgi brukernavn for å starte"]
                ]
             ]
     Ok ast -> 
@@ -242,7 +251,7 @@ viewBottomAdvanced model = case model.currentAST of
 
 viewTitle : Html Msg
 viewTitle =
-    div [ class "title" ] [ text "VisAST" ]
+    p [ class "title" ] [ text "VisAST" ]
 
 
 viewLeftMenu : Model -> Html Msg
