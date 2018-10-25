@@ -6,7 +6,7 @@ import Model exposing (..)
 nextState : Model -> Model
 nextState model =
     case ( model.currentAST, model.nextSteps ) of
-        ( Ok curAST, Just (next :: rest) ) ->
+        ( Just curAST, Just (next :: rest) ) ->
             let
                 newPrevSteps =
                     case model.previousSteps of
@@ -17,7 +17,7 @@ nextState model =
                             curAST :: xs
             in
             { model
-                | currentAST = Ok next
+                | currentAST = Just next
                 , nextSteps = Just rest
                 , previousSteps = Just newPrevSteps
             }
@@ -29,7 +29,7 @@ nextState model =
 previousState : Model -> Model
 previousState model =
     case ( model.currentAST, model.previousSteps ) of
-        ( Ok curAST, Just (prev :: rest) ) ->
+        ( Just curAST, Just (prev :: rest) ) ->
             let
                 newNextSteps =
                     case model.nextSteps of
@@ -40,7 +40,7 @@ previousState model =
                             curAST :: xs
             in
             { model
-                | currentAST = Ok prev
+                | currentAST = Just prev
                 , nextSteps = Just newNextSteps
                 , previousSteps = Just rest
             }

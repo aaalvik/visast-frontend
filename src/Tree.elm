@@ -1,7 +1,7 @@
 module Tree exposing (drawTree)
 
 import Helpers.Width as Width
-import Html exposing (Html, div, text)
+import Html exposing (Html, div, text, strong)
 import Model exposing (AST, Children(..))
 import Svg exposing (Svg, svg)
 import Svg.Attributes as Attrs exposing (..)
@@ -23,14 +23,13 @@ nodeColor =
     "#51578D"
 
 
-drawTree : Result String AST -> Svg msg
+drawTree : Maybe AST -> Svg msg
 drawTree maybeAST =
     case maybeAST of
-        Err str ->
-            [ drawText str 550 50 "black" ]
-                |> svg [ class "tree" ]
+        Nothing ->
+            div [] []
 
-        Ok ast ->
+        Just ast ->
             let
                 startX =
                     400

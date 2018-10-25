@@ -14,7 +14,8 @@ import Tree
 
 init : ( Model, Cmd Msg )
 init =
-    ( { currentAST = Err "" -- TODO change to "Initial" and fix other problems 
+    ( { currentAST = Nothing
+      , requestStatus = Good 
       , nextSteps = Nothing
       , previousSteps = Nothing
       , input = Nothing
@@ -73,31 +74,18 @@ update msg model =
                     ( model, Request.parseAndGetSteps StepsReceived str )
 
                 Nothing ->
-                    ( { model | currentAST = Err "Cannot parse empty expression" }, Cmd.none )
+                    ( model, Cmd.none )
 
         StepsReceived result ->
             case result of
                 Ok (ast :: next) ->
-                    let
-                        currentAST =
-                            Ok ast
-
-                        nextSteps =
-                            Just next
-
-                        previousSteps =
-                            Just []
-
-                        newModel =
-                            { model | currentAST = currentAST, nextSteps = nextSteps, previousSteps = previousSteps }
-                    in
-                    ( newModel, Cmd.none )
+                    updateASTs ast next model 
 
                 Ok [] ->
-                    ( { model | currentAST = Err "Received empty list of steps" }, Cmd.none )
+                    ( { model | currentAST = Nothing, requestStatus = InvalidInput }, Cmd.none )
 
                 Err err ->
-                    ( { model | currentAST = Err <| "Received error: " ++ errorToString err }, Cmd.none )
+                    ( { model | currentAST = Nothing, requestStatus = ReceivedError }, Cmd.none )
 
         NextState ->
             ( Step.nextState model, Cmd.none )
@@ -112,6 +100,32 @@ update msg model =
 
         ChangeMode newMode ->
             ( { model | viewMode = newMode }, Cmd.none )
+
+
+updateASTs : AST -> List AST -> Model -> (Model, Cmd Msg)
+updateASTs ast next model = 
+    let
+        currentAST =
+            Just ast
+
+        nextSteps =
+            Just next
+
+        previousSteps =
+            Just []
+
+        requestStatus = 
+            Good 
+
+        newModel =
+            { model 
+                | currentAST = currentAST
+                , nextSteps = nextSteps
+                , previousSteps = previousSteps
+                , requestStatus = Good
+            }
+    in
+    ( newModel, Cmd.none )
 
 
 enterButtonPressed : Model -> (Model, Cmd Msg)
@@ -136,7 +150,7 @@ enterButtonPressed model =
                         ( model, Request.parseAndGetSteps StepsReceived str )
 
                     Nothing ->
-                        ( { model | currentAST = Err "Cannot parse empty expression" }, Cmd.none )
+                        ( model, Cmd.none )
 
         
 validKey : String -> Bool 
@@ -188,8 +202,8 @@ viewTop model =
         Advanced -> 
             [ viewTitle ] ++ (
                 case model.currentAST of 
-                    Err _ -> [] 
-                    Ok _ -> 
+                    Nothing -> [] 
+                    Just _ -> 
                         [ div [ class "buttons" ]
                             [ button [ class "button btn", onClick PreviousState ] [ text "Previous" ]
                             , button [ class "button btn", onClick NextState ] [ text "Next" ]
@@ -229,24 +243,57 @@ viewBottom model =
         Test ->
             div [ class "ast-container" ]
             [ viewLeftMenu model
-            , viewAST model.currentAST
+            , (case model.requestStatus of 
+                Good -> 
+                    viewAST model.currentAST
+                
+                InvalidInput -> 
+                    div [ class "ast-container" ]
+                        [ div [ class "advanced-entry"]
+                            [ strong [] [ text "Du skrev inn noe ugyldig, sjekk grammatikken igjen" ] ]
+                        ]
+
+                ReceivedError -> 
+                    div [ class "ast-container" ]
+                        [ div [ class "advanced-entry"]
+                            [ strong [] [ text "Oops, noe gikk galt😬 Refresh siden og prøv igjen"] ]
+                        ]                     
+            )
             ]
 
 
 viewBottomAdvanced : Model -> Html Msg 
-viewBottomAdvanced model = case model.currentAST of 
-    Err _ -> 
+viewBottomAdvanced model = case (model.currentAST, model.requestStatus) of 
+    (Nothing, Good) -> 
         div [ class "ast-container" ]
             [ div [ class "advanced-entry"]
                 [ textInput "abc123" "key-input" UpdateInputKey 
                 , strong [] [ text "Oppgi brukernavn for å starte"]
                ]
             ]
-    Ok ast -> 
+
+    (_, InvalidInput) -> 
+        div [ class "ast-container" ]
+            [ div [ class "advanced-entry"]
+                [ textInput "abc123" "key-input" UpdateInputKey 
+                , strong [] [ text "Fant ingenting på det brukernavnet, prøv igjen"]
+               ]
+            ]     
+
+    (_, ReceivedError) -> 
+        div [ class "ast-container" ]
+            [ div [ class "advanced-entry"]
+                [ strong [] [ text "Oops, noe gikk galt😬 Refresh siden og prøv igjen"]
+               ]
+            ]             
+
+    (Just ast, Good) -> 
         div [ class "ast-container" ]
             [ --viewLeftMenu model
              viewAST model.currentAST
             ]
+
+    
 
 
 viewTitle : Html Msg
@@ -281,9 +328,9 @@ textInput str className msg =
         []
 
 
-viewAST : Result String AST -> Html Msg
-viewAST ast =
-    [ Tree.drawTree ast ]
+viewAST : Maybe AST -> Html Msg
+viewAST mast =
+    [ Tree.drawTree mast ]
         |> div [ class "tree-container" ]
     
 
