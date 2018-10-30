@@ -2,7 +2,8 @@ module Model exposing (..)
 
 
 type alias Model =
-    { currentAST : Result String AST
+    { currentAST : Maybe AST
+    , requestStatus : RequestStatus 
     , nextSteps : Maybe (List AST)
     , previousSteps : Maybe (List AST)
     , input : Maybe String
@@ -26,3 +27,7 @@ type Children
 
 
 type ViewMode = Initial | Advanced | Test 
+
+
+type RequestStatus
+    = Good | InvalidInput | ReceivedError
