@@ -33,23 +33,3 @@ getStepsFromStudent msg keyStr =
             Http.get url Decode.steps
     in
     Http.send msg request 
-
-
--- getInitialAST msg =
---     let
---         url =
---             globalUrl ++ "/initial"
---         request =
---             Http.get url Decode.ast
---     in
---     Http.send msg request
--- getStepAST msg ast =
---     let
---         url =
---             globalUrl ++ "/step"
---         body =
---             Http.jsonBody (Encode.ast ast)
---         request =
---             Http.post url body Decode.ast
---     in
---     Http.send msg request

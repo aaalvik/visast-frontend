@@ -6,9 +6,9 @@ type alias Model =
     , requestStatus : RequestStatus 
     , nextSteps : Maybe (List AST)
     , previousSteps : Maybe (List AST)
-    , input : Maybe String
     , viewMode : ViewMode 
-    , key : Maybe String 
+    , exprStr : Maybe String
+    , usernameStr : String 
     }
 
 

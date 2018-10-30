@@ -18,9 +18,9 @@ init =
       , requestStatus = Good 
       , nextSteps = Nothing
       , previousSteps = Nothing
-      , input = Nothing
+      , exprStr = Nothing
       , viewMode = Initial
-      , key = Nothing
+      , usernameStr = ""
       }
     , Cmd.none
     )
@@ -31,8 +31,8 @@ init =
 
 
 type Msg
-    = UpdateInputExpr String
-    | UpdateInputKey String
+    = SetExprStr String
+    | SetUsernameStr String
     | ParseAndGetSteps
     | StepsReceived (Result Http.Error (List AST))
     | NextState
@@ -44,9 +44,9 @@ type Msg
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        UpdateInputExpr str ->
+        SetExprStr str ->
             ( { model
-                | input =
+                | exprStr =
                     if String.isEmpty str then
                         Nothing
 
@@ -56,20 +56,11 @@ update msg model =
             , Cmd.none
             )
 
-        UpdateInputKey key ->
-            ( { model
-                | key =
-                    if String.isEmpty key then
-                        Nothing
-
-                    else
-                        Just key
-              }
-            , Cmd.none
-            )
+        SetUsernameStr str ->
+            ( { model | usernameStr = str }, Cmd.none )
 
         ParseAndGetSteps ->
-            case model.input of
+            case model.exprStr of
                 Just str ->
                     ( model, Request.parseAndGetSteps StepsReceived str )
 
@@ -135,17 +126,12 @@ enterButtonPressed model =
             ( model, Cmd.none )
 
         Advanced -> 
-            case model.key of 
-                Just keyStr -> 
-                    if validKey keyStr then 
-                        (model, Request.getStepsFromStudent StepsReceived keyStr)
-                    else (model, Cmd.none)
-
-                Nothing -> 
-                    (model, Cmd.none)
+            if validUsername model.usernameStr then 
+                (model, Request.getStepsFromStudent StepsReceived model.usernameStr)
+            else (model, Cmd.none)
 
         Test -> 
-            case model.input of
+            case model.exprStr of
                     Just str ->
                         ( model, Request.parseAndGetSteps StepsReceived str )
 
@@ -153,8 +139,8 @@ enterButtonPressed model =
                         ( model, Cmd.none )
 
         
-validKey : String -> Bool 
-validKey _ = True -- TODO implement for input validation      
+validUsername : String -> Bool 
+validUsername _ = True -- TODO implement for input validation      
 
 
 errorToString err =
@@ -213,7 +199,7 @@ viewTop model =
 
         Test ->
             [ div [ class "input-container" ]
-                [ textInput "Skriv uttrykk her" "expr-input" UpdateInputExpr
+                [ textInput "Skriv uttrykk her" "expr-input" SetExprStr
                 ]
             , div [ class "buttons" ]
                 [ button [ class "button btn", onClick ParseAndGetSteps ] [ text "Parse" ]
@@ -267,7 +253,7 @@ viewBottomAdvanced model = case (model.currentAST, model.requestStatus) of
     (Nothing, Good) -> 
         div [ class "ast-container" ]
             [ div [ class "advanced-entry"]
-                [ textInput "abc123" "key-input" UpdateInputKey 
+                [ textInput "abc123" "key-input" SetUsernameStr
                 , strong [] [ text "Oppgi brukernavn for å starte"]
                ]
             ]
@@ -275,7 +261,7 @@ viewBottomAdvanced model = case (model.currentAST, model.requestStatus) of
     (_, InvalidInput) -> 
         div [ class "ast-container" ]
             [ div [ class "advanced-entry"]
-                [ textInput "abc123" "key-input" UpdateInputKey 
+                [ textInput "abc123" "key-input" SetUsernameStr
                 , strong [] [ text "Fant ingenting på det brukernavnet, prøv igjen"]
                ]
             ]     
