@@ -39,6 +39,7 @@ type Msg
     | PreviousState
     | KeyDown Int
     | ChangeMode ViewMode
+    | RefreshSteps 
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -91,6 +92,9 @@ update msg model =
 
         ChangeMode newMode ->
             ( { model | viewMode = newMode }, Cmd.none )
+
+        RefreshSteps -> 
+            (model, Request.getStepsFromStudent StepsReceived model.usernameStr)
 
 
 updateASTs : AST -> List AST -> Model -> (Model, Cmd Msg)
@@ -191,9 +195,10 @@ viewTop model =
                     Nothing -> [] 
                     Just _ -> 
                         [ div [ class "buttons" ]
-                            [ button [ class "button btn", onClick PreviousState ] [ text "Previous" ]
-                            , button [ class "button btn", onClick NextState ] [ text "Next" ]
-                            ] 
+                            [ button [ class "button btn", onClick PreviousState ] [ text "Forrige" ]
+                            , button [ class "button btn", onClick NextState ] [ text "Neste" ]
+                            , button [ class "button btn", onClick RefreshSteps] [ text "Last inn på nytt"]
+                            ]
                         ]
             )
 
@@ -203,8 +208,8 @@ viewTop model =
                 ]
             , div [ class "buttons" ]
                 [ button [ class "button btn", onClick ParseAndGetSteps ] [ text "Parse" ]
-                , button [ class "button btn", onClick PreviousState ] [ text "Previous" ]
-                , button [ class "button btn", onClick NextState ] [ text "Next" ]
+                , button [ class "button btn", onClick PreviousState ] [ text "Forrige" ]
+                , button [ class "button btn", onClick NextState ] [ text "Neste" ]
                 ]
             ]
 

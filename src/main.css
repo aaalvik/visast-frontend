@@ -138,8 +138,9 @@ body {
   background-color: var(--light);
   outline: none;
   height: 35px;
-  width: 80px;
+  min-width: 80px;
   border: none;
+  padding: 0 15px;
 }
 
 .button:focus { outline: none; color: white;}
