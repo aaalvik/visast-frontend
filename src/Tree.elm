@@ -32,7 +32,7 @@ drawTree maybeAST =
         Just ast ->
             let
                 startX =
-                    400
+                    0
 
                 startY =
                     50

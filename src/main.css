@@ -43,7 +43,6 @@ body {
   flex-direction: column;
   background-color: var(--lighter);
   padding: 20px;
-  /* padding-bottom: 0; */
   min-height: 140px;
 }
 
@@ -52,8 +51,6 @@ body {
   justify-content: center;
   width: 100%;
   height: 100%;
-  /* overflow-x: scroll;
-  overflow-y: scroll; */
 }
 
 .tree-container {
@@ -61,8 +58,6 @@ body {
   height: 100%;
   font-weight: 500;
   text-align: center;
-  /* overflow-x: scroll;
-  overflow-y: scroll; */
 }
 
 .bottom-container {
@@ -87,11 +82,14 @@ body {
   display: flex;
   justify-content: center;
   padding: 0;
-  /* overflow-x: scroll; */
   position: relative;
   width: 100%;
   height: 100%;
   font-size: 16px;
+}
+
+.tree line, text, rect {
+  transform: translate(50%, 0);
 }
 
 .input {
@@ -175,7 +173,6 @@ body {
   margin-top: 10px;
   padding: 10px 10px 10px 20px;
   font-size: 14px;
-  /* background-color: bisque; */
   display: flex;
   flex-direction: column;
 }
@@ -194,7 +191,6 @@ body {
 
 .grammar-container {
   padding: 10px;
-  /* border: solid 1px var(--light); */
 }
 
 .grammar-container p {
