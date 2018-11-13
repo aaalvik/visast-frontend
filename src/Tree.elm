@@ -36,9 +36,18 @@ drawTree maybeAST =
 
                 startY =
                     50
+                
+                w = 
+                    ast 
+                        |> Width.tree
+                        |> (+) 100
             in
             drawSubTree startX startY ast
-                |> svg [ class "tree" ]
+                |> svg 
+                    [ class "tree"
+                    , width <| String.fromInt w ++ "px" 
+                    --, viewBox <| (String.fromInt (0 - w//2)) ++ " 0 " ++ String.fromInt (w//2) ++ " 1100"
+                    ]
 
 
 drawSubTree : Int -> Int -> AST -> List (Svg msg)
