@@ -42,7 +42,7 @@ body {
   width: 100%;
   flex-direction: column;
   background-color: var(--lighter);
-  padding: 20px;
+  padding: 20px 0;
   min-height: 140px;
 }
 
