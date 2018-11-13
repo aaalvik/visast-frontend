@@ -192,7 +192,7 @@ drawTextInNode name xPos yPos =
 
 drawText : String -> Int -> Int -> String -> Svg msg
 drawText name xPos yPos fillColor =
-    Svg.text_ [ alignmentBaseline "middle", textAnchor "middle", x (String.fromInt xPos), y (String.fromInt yPos), fill fillColor ] [ text name ]
+    Svg.text_ [ dominantBaseline "middle", textAnchor "middle", x (String.fromInt xPos), y (String.fromInt yPos), fill fillColor ] [ text name ]
 
 
 nextY : Int -> Int
