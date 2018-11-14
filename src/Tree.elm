@@ -46,7 +46,8 @@ drawTree maybeAST =
                 |> svg 
                     [ class "tree"
                     , width <| String.fromInt w ++ "px" 
-                    --, viewBox <| (String.fromInt (0 - w//2)) ++ " 0 " ++ String.fromInt (w//2) ++ " 1100"
+                    , height <| String.fromInt (w//6 + 100) ++ "px"
+                    , viewBox <| "0 0 " ++ String.fromInt w ++ " " ++ String.fromInt (w//6 + 100)
                     ]
 
 
