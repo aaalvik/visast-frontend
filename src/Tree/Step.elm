@@ -1,4 +1,4 @@
-module Step exposing (nextState, previousState)
+module Tree.Step exposing (nextState, previousState)
 
 import Model exposing (..)
 

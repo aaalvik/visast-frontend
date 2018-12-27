@@ -1,4 +1,4 @@
-module Tree exposing (drawTree)
+module Tree.Tree exposing (drawTree)
 
 import Helpers.Width as Width
 import Html exposing (Html, div, text, strong)

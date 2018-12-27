@@ -1,7 +1,7 @@
-module Request exposing (parseAndGetSteps, getStepsFromStudent)
+module Request.Request exposing (parseAndGetSteps, getStepsFromStudent)
 
-import Decode
-import Encode
+import Request.Decode as Decode 
+import Request.Encode as Encode 
 import Http
 
 

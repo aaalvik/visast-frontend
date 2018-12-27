@@ -1,4 +1,4 @@
-module Decode exposing (ast, steps)
+module Request.Decode exposing (ast, steps)
 
 import Json.Decode as Decode exposing (Decoder, string)
 import Json.Decode.Pipeline exposing (required)

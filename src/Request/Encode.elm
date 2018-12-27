@@ -1,4 +1,4 @@
-module Encode exposing (ast, input)
+module Request.Encode exposing (ast, input)
 
 import Json.Encode as Encode
 import Model exposing (AST, Children(..))
