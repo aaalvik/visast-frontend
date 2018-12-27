@@ -50,7 +50,8 @@ type Children
 type Page 
     = Index
     | Easy 
-    | Advanced
+    | Advanced String 
+    | InsertUsername
 
 
 type RequestStatus

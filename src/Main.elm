@@ -126,10 +126,8 @@ updateASTs ast next model =
 enterButtonPressed : Model -> (Model, Cmd Msg)
 enterButtonPressed model = 
     case model.page of 
-        Index -> 
-            ( model, Cmd.none )
-
-        Advanced -> 
+        InsertUsername -> 
+            -- TODO FIX ROUTE 
             if validUsername model.usernameStr then 
                 (model, Request.getStepsFromStudent StepsReceived model.usernameStr)
             else (model, Cmd.none)
@@ -141,6 +139,9 @@ enterButtonPressed model =
 
                     Nothing ->
                         ( model, Cmd.none )
+
+        _ -> 
+            ( model, Cmd.none )
 
         
 validUsername : String -> Bool 
@@ -177,7 +178,8 @@ view : Model -> Browser.Document Msg
 view model =
     case model.page of 
         Index -> Index.view model 
-        Advanced -> Advanced.view model 
+        Advanced _ -> Advanced.view model 
+        InsertUsername -> Advanced.viewInsertUsername
         Easy -> Easy.view model 
 
 
