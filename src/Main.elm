@@ -10,17 +10,23 @@ import Model exposing (..)
 import Request
 import Step
 import Tree
+import Url
+import Browser.Navigation as Nav 
+import Route
 
 
-init : ( Model, Cmd Msg )
-init =
+init : () -> Url.Url -> Nav.Key -> ( Model, Cmd Msg )
+init flags url key =
     ( { currentAST = Nothing
       , requestStatus = Good 
       , nextSteps = Nothing
       , previousSteps = Nothing
       , exprStr = Nothing
-      , viewMode = Initial
+      --, viewMode = Initial
       , usernameStr = ""
+      , key = key 
+      , url = url 
+      , page = Route.urlToPage url
       }
     , Cmd.none
     )
@@ -38,8 +44,10 @@ type Msg
     | NextState
     | PreviousState
     | KeyDown Int
-    | ChangeMode ViewMode
+    --| ChangeMode ViewMode
     | RefreshSteps 
+    | LinkClicked Browser.UrlRequest
+    | UrlChanged Url.Url
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -90,11 +98,24 @@ update msg model =
             else
                 ( model, Cmd.none )
 
-        ChangeMode newMode ->
-            ( { model | viewMode = newMode }, Cmd.none )
+        -- ChangeMode newMode ->
+        --     ( { model | viewMode = newMode }, Cmd.none )
 
         RefreshSteps -> 
             (model, Request.getStepsFromStudent StepsReceived model.usernameStr)
+
+        LinkClicked urlRequest ->
+            case urlRequest of
+                Browser.Internal url ->
+                    ( model, Nav.pushUrl model.key (Url.toString url) )
+
+                Browser.External href ->
+                    ( model, Nav.load href )
+
+        UrlChanged url ->
+            ( { model | url = url, page = Route.urlToPage url }
+            , Cmd.none
+            )
 
 
 updateASTs : AST -> List AST -> Model -> (Model, Cmd Msg)
@@ -125,8 +146,8 @@ updateASTs ast next model =
 
 enterButtonPressed : Model -> (Model, Cmd Msg)
 enterButtonPressed model = 
-    case model.viewMode of 
-        Initial -> 
+    case model.page of 
+        Index -> 
             ( model, Cmd.none )
 
         Advanced -> 
@@ -134,7 +155,7 @@ enterButtonPressed model =
                 (model, Request.getStepsFromStudent StepsReceived model.usernameStr)
             else (model, Cmd.none)
 
-        Test -> 
+        Easy -> 
             case model.exprStr of
                     Just str ->
                         ( model, Request.parseAndGetSteps StepsReceived str )
@@ -173,20 +194,24 @@ responseToString res =
 ---- VIEW ----
 
 
-view : Model -> Html Msg
+view : Model -> Browser.Document Msg
 view model =
-    div [ class "page" ]
-        [ div [ class "content" ]
-            [ div [ class "top-container" ] <| viewTop model
-            , viewBottom model
+    { title = "VisAST"
+    , body = 
+        [div [ class "page" ]
+            [ div [ class "content" ]
+                [ div [ class "top-container" ] <| viewTop model
+                , viewBottom model
+                ]
             ]
         ]
+    }
 
 
 viewTop : Model -> List (Html Msg)
 viewTop model =
-    case model.viewMode of
-        Initial ->
+    case model.page of
+        Index ->
             [ viewTitle ]
 
         Advanced -> 
@@ -202,7 +227,7 @@ viewTop model =
                         ]
             )
 
-        Test ->
+        Easy ->
             [ div [ class "input-container" ]
                 [ textInput "Skriv uttrykk her" "expr-input" SetExprStr
                 ]
@@ -214,16 +239,22 @@ viewTop model =
             ]
 
 
+viewBigButton name ref = 
+    a [ href ref ]
+    [ button 
+        [ class "button btn big-button" ] [ text name ]
+    ]
+
 viewBottom : Model -> Html Msg
 viewBottom model =
-    case model.viewMode of
-        Initial ->
+    case model.page of
+        Index ->
             [ div [ class "big-button--container" ]
-                [ button [ class "button btn big-button", onClick <| ChangeMode Test ] [ text "Bli kjent" ]
+                [ viewBigButton "Bli kjent" "/easy"
                 , div [ class "big-button--text" ] [ text "Bli kjent med programmet uten å ha skrevet noe kode." ]
                 ]
             , div [ class "big-button--container" ]
-                [ button [ class "button btn big-button", onClick <| ChangeMode Advanced ] [ text "Avansert" ]
+                [ viewBigButton "Avansert" "/advanced"
                 , div [ class "big-button--text" ] [ text "Visualiser ved hjelp av din egen evalueringsfunksjon!" ]
                 ]
             ] |> div [ class "bottom-container" ]
@@ -231,7 +262,7 @@ viewBottom model =
         Advanced -> 
             viewBottomAdvanced model 
 
-        Test ->
+        Easy ->
             div [ class "ast-container" ]
             [ viewLeftMenu model
             , (case model.requestStatus of 
@@ -337,9 +368,11 @@ onKeyDown tagger =
 
 main : Program () Model Msg
 main =
-    Browser.element
-        { view = view
-        , init = \_ -> init
+    Browser.application
+        { init = init
+        , view = view
         , update = update
         , subscriptions = always Sub.none
+        , onUrlRequest = LinkClicked
+        , onUrlChange = UrlChanged
         }
