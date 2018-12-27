@@ -8,7 +8,6 @@ type alias Model =
     , requestStatus : RequestStatus 
     , nextSteps : Maybe (List AST)
     , previousSteps : Maybe (List AST)
-    --, viewMode : ViewMode 
     , exprStr : Maybe String
     , usernameStr : String 
     , key : Nav.Key
@@ -29,9 +28,6 @@ type alias AST =
 
 type Children
     = Children (List AST)
-
-
---type ViewMode = Initial | Advanced | Test 
 
 
 type Page 

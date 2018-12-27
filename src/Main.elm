@@ -22,7 +22,6 @@ init flags url key =
       , nextSteps = Nothing
       , previousSteps = Nothing
       , exprStr = Nothing
-      --, viewMode = Initial
       , usernameStr = ""
       , key = key 
       , url = url 
@@ -44,7 +43,6 @@ type Msg
     | NextState
     | PreviousState
     | KeyDown Int
-    --| ChangeMode ViewMode
     | RefreshSteps 
     | LinkClicked Browser.UrlRequest
     | UrlChanged Url.Url
@@ -97,9 +95,6 @@ update msg model =
             if key == 13 then enterButtonPressed model 
             else
                 ( model, Cmd.none )
-
-        -- ChangeMode newMode ->
-        --     ( { model | viewMode = newMode }, Cmd.none )
 
         RefreshSteps -> 
             (model, Request.getStepsFromStudent StepsReceived model.usernameStr)
