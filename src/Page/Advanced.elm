@@ -58,7 +58,7 @@ viewBottom model = case model.requestStatus of
     Good -> 
         div [ class "ast-container" ]
             [ --viewLeftMenu model
-            View.viewAST model.currentAST
+            View.viewAST <| Maybe.map (.current) model.asts
             ]
 
     InvalidInput -> 
@@ -75,12 +75,4 @@ viewBottom model = case model.requestStatus of
                 [ strong [] [ text "Oops, noe gikk galt😬 Refresh siden og prøv igjen"]
                ]
             ]             
-    -- (Nothing, Good) -> 
-        -- div [ class "ast-container" ]
-        --     [ div [ class "advanced-entry"]
-        --         [ View.textInput "abc123" "key-input" KeyDown SetUsernameStr
-        --         , strong [] [ text "Oppgi brukernavn for å starte"]
-        --        ]
-        --     ]
-
 

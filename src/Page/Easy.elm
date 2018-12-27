@@ -40,7 +40,7 @@ viewBottom model =
         [ View.viewLeftMenu model
         , (case model.requestStatus of 
             Good -> 
-                View.viewAST model.currentAST
+                View.viewAST <| Maybe.map (.current) model.asts
 
             InvalidInput -> 
                 div [ class "ast-container" ]

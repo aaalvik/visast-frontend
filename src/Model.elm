@@ -7,10 +7,11 @@ import Http
 import RemoteData exposing (WebData)
 
 type alias Model =
-    { currentAST : Maybe AST
-    , requestStatus : RequestStatus 
-    , nextSteps : Maybe (List AST)
-    , previousSteps : Maybe (List AST)
+    { requestStatus : RequestStatus 
+    , asts : Maybe ASTS
+    -- , currentAST : Maybe AST
+    -- , nextSteps : Maybe (List AST)
+    -- , previousSteps : Maybe (List AST)
     , exprStr : Maybe String
     , usernameStr : String 
     , key : Nav.Key
@@ -40,6 +41,13 @@ type alias Name =
 type alias AST =
     { name : String
     , children : Children
+    }
+
+
+type alias ASTS = 
+    { current : AST
+    , prev : List AST 
+    , next : List AST
     }
 
 

@@ -15,10 +15,11 @@ import Page.Index as Index
 
 init : () -> Url.Url -> Nav.Key -> ( Model, Cmd Msg )
 init flags url key =
-    ( { currentAST = Nothing
-      , requestStatus = Good 
-      , nextSteps = Nothing
-      , previousSteps = Nothing
+    ( { requestStatus = Good 
+    --   , currentAST = Nothing
+    --   , nextSteps = Nothing
+    --   , previousSteps = Nothing
+      , asts = Nothing 
       , exprStr = Nothing
       , usernameStr = ""
       , key = key 
@@ -61,13 +62,13 @@ update msg model =
         StepsReceived result ->
             case result of
                 Ok (ast :: next) ->
-                    updateASTs ast next model 
+                    updateASTS ast next model 
 
                 Ok [] ->
-                    ( { model | currentAST = Nothing, requestStatus = InvalidInput }, Cmd.none )
+                    ( { model | asts = Nothing, requestStatus = InvalidInput }, Cmd.none )
 
                 Err err ->
-                    ( { model | currentAST = Nothing, requestStatus = ReceivedError }, Cmd.none )
+                    ( { model | asts = Nothing, requestStatus = ReceivedError }, Cmd.none )
 
         NextState ->
             ( Tree.nextState model, Cmd.none )
@@ -97,26 +98,18 @@ update msg model =
             )
 
 
-updateASTs : AST -> List AST -> Model -> (Model, Cmd Msg)
-updateASTs ast next model = 
+updateASTS : AST -> List AST -> Model -> (Model, Cmd Msg)
+updateASTS ast next model = 
     let
-        currentAST =
-            Just ast
-
-        nextSteps =
-            Just next
-
-        previousSteps =
-            Just []
-
-        requestStatus = 
-            Good 
+        newASTS = 
+            { current = ast 
+            , next = next
+            , prev = [] 
+            }
 
         newModel =
             { model 
-                | currentAST = currentAST
-                , nextSteps = nextSteps
-                , previousSteps = previousSteps
+                | asts = Just newASTS
                 , requestStatus = Good
             }
     in

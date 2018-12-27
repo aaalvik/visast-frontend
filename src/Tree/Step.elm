@@ -5,45 +5,43 @@ import Model exposing (..)
 
 nextState : Model -> Model
 nextState model =
-    case ( model.currentAST, model.nextSteps ) of
-        ( Just curAST, Just (next :: rest) ) ->
-            let
-                newPrevSteps =
-                    case model.previousSteps of
-                        Nothing ->
-                            [ curAST ]
+    case model.asts of 
+        Just asts ->
+            case asts.next of 
+                (ast :: rest) -> 
+                    let 
+                        newASTS = 
+                            { asts 
+                                | current = ast 
+                                , next = rest
+                                , prev = asts.current :: asts.prev
+                            }
+                    in 
+                    { model | asts = Just newASTS } 
 
-                        Just xs ->
-                            curAST :: xs
-            in
-            { model
-                | currentAST = Just next
-                , nextSteps = Just rest
-                , previousSteps = Just newPrevSteps
-            }
-
-        _ ->
-            model
+                [] -> 
+                    model 
+        Nothing -> 
+            model 
 
 
 previousState : Model -> Model
 previousState model =
-    case ( model.currentAST, model.previousSteps ) of
-        ( Just curAST, Just (prev :: rest) ) ->
-            let
-                newNextSteps =
-                    case model.nextSteps of
-                        Nothing ->
-                            [ curAST ]
+    case model.asts of 
+        Just asts -> 
+            case asts.prev of 
+                (ast :: rest) -> 
+                    let 
+                        newASTS = 
+                            { asts 
+                                | current = ast 
+                                , prev = rest 
+                                , next = asts.current :: asts.next
+                            }
+                    in 
+                    { model | asts = Just newASTS }
 
-                        Just xs ->
-                            curAST :: xs
-            in
-            { model
-                | currentAST = Just prev
-                , nextSteps = Just newNextSteps
-                , previousSteps = Just rest
-            }
-
-        _ ->
-            model
+                [] ->
+                    model 
+        Nothing -> 
+            model 
