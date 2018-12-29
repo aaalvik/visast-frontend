@@ -15,14 +15,26 @@ import Url
 
 init : () -> Url.Url -> Nav.Key -> ( Model, Cmd Msg )
 init flags url key =
+    let
+        page =
+            Route.urlToPage url
+
+        cmd =
+            case page of
+                Advanced NotAsked username ->
+                    Request.getStepsFromStudent (UserStepsReceived username) username
+
+                _ ->
+                    Cmd.none
+    in
     ( { asts = Nothing
       , exprStr = Nothing
       , usernameStr = ""
       , key = key
       , url = url
-      , page = Route.urlToPage url
+      , page = page
       }
-    , Cmd.none
+    , cmd
     )
 
 
@@ -115,7 +127,7 @@ update msg model =
                     ( newModel, Cmd.none )
 
         NextState ->
-            ( Tree.nextState model, Cmd.none )
+            Debug.log "TEST" ( Tree.nextState model, Cmd.none )
 
         PreviousState ->
             ( Tree.previousState model, Cmd.none )
@@ -139,19 +151,7 @@ update msg model =
                     ( model, Nav.load href )
 
         UrlChanged url ->
-            let
-                newPage =
-                    Route.urlToPage url
-
-                cmd =
-                    case newPage of
-                        Advanced NotAsked username ->
-                            Request.getStepsFromStudent (UserStepsReceived username) username
-
-                        _ ->
-                            Cmd.none
-            in
-            ( resetInput { model | url = url, page = newPage }, cmd )
+            ( { model | url = url, page = Route.urlToPage url }, Cmd.none )
 
 
 resetInput : Model -> Model
