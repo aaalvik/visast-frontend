@@ -25,6 +25,7 @@ type Msg
     | SetUsernameStr String
     | ParseAndGetSteps
     | StepsReceived (Result Http.Error (List AST))
+    | UserStepsReceived String (Result Http.Error (List AST))
     | NextState
     | PreviousState
     | KeyDown Int

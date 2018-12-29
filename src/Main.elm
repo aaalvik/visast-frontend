@@ -62,13 +62,27 @@ update msg model =
         StepsReceived result ->
             case result of
                 Ok (ast :: next) ->
-                    updateASTS ast next model 
+                    (updateASTS ast next model, Cmd.none)
 
                 Ok [] ->
                     ( { model | asts = Nothing, requestStatus = InvalidInput }, Cmd.none )
 
                 Err err ->
                     ( { model | asts = Nothing, requestStatus = ReceivedError }, Cmd.none )
+
+        UserStepsReceived username result -> 
+            case result of
+                Ok (ast :: next) ->
+                    let url = "advanced/" ++ String.toLower username
+                    in
+                    (updateASTS ast next model, Nav.pushUrl model.key url)
+
+                Ok [] ->
+                    ( { model | asts = Nothing, requestStatus = InvalidInput }, Cmd.none )
+
+                Err err ->
+                    ( { model | asts = Nothing, requestStatus = ReceivedError }, Cmd.none )
+        
 
         NextState ->
             ( Tree.nextState model, Cmd.none )
@@ -98,7 +112,7 @@ update msg model =
             )
 
 
-updateASTS : AST -> List AST -> Model -> (Model, Cmd Msg)
+updateASTS : AST -> List AST -> Model -> Model
 updateASTS ast next model = 
     let
         newASTS = 
@@ -112,17 +126,22 @@ updateASTS ast next model =
                 | asts = Just newASTS
                 , requestStatus = Good
             }
+        
+        url = "advanced/" ++ "raa009"
     in
-    ( newModel, Cmd.none )
+    newModel
 
 
 enterButtonPressed : Model -> (Model, Cmd Msg)
 enterButtonPressed model = 
+    let 
+        username = model.usernameStr
+    in
     case model.page of 
         InsertUsername -> 
             -- TODO FIX ROUTE 
-            if validUsername model.usernameStr then 
-                (model, Request.getStepsFromStudent StepsReceived model.usernameStr)
+            if validUsername username then 
+                (model, Request.getStepsFromStudent (UserStepsReceived username) username)
             else (model, Cmd.none)
 
         Easy -> 
