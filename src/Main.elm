@@ -127,7 +127,7 @@ update msg model =
                     ( newModel, Cmd.none )
 
         NextState ->
-            Debug.log "TEST" ( Tree.nextState model, Cmd.none )
+            ( Tree.nextState model, Cmd.none )
 
         PreviousState ->
             ( Tree.previousState model, Cmd.none )
