@@ -1,33 +1,30 @@
-module Main exposing (..)
+module Main exposing (enterButtonPressed, errorToString, init, main, responseToString, setASTS, setPage, update, updateASTS, validUsername, view)
 
 import Browser
+import Browser.Navigation as Nav
 import Http exposing (Error(..), Response)
 import Model exposing (..)
+import Page.Advanced as Advanced
+import Page.Easy as Easy
+import Page.Index as Index
 import Request.Request as Request
-import Url
-import Tree.Step as Tree 
-import Browser.Navigation as Nav 
 import Route
-import Page.Advanced as Advanced 
-import Page.Easy as Easy 
-import Page.Index as Index 
+import Tree.Step as Tree
+import Url
 
 
 init : () -> Url.Url -> Nav.Key -> ( Model, Cmd Msg )
 init flags url key =
-    ( { requestStatus = Good 
-    --   , currentAST = Nothing
-    --   , nextSteps = Nothing
-    --   , previousSteps = Nothing
-      , asts = Nothing 
+    ( { asts = Nothing
       , exprStr = Nothing
       , usernameStr = ""
-      , key = key 
-      , url = url 
+      , key = key
+      , url = url
       , page = Route.urlToPage url
       }
     , Cmd.none
     )
+
 
 
 ---- UPDATE ----
@@ -62,27 +59,60 @@ update msg model =
         StepsReceived result ->
             case result of
                 Ok (ast :: next) ->
-                    (updateASTS ast next model, Cmd.none)
+                    let
+                        newModel =
+                            model
+                                |> updateASTS ast next
+                                |> setPage (Easy Good)
+                    in
+                    ( newModel, Cmd.none )
 
                 Ok [] ->
-                    ( { model | asts = Nothing, requestStatus = InvalidInput }, Cmd.none )
+                    let
+                        newModel =
+                            model
+                                |> setASTS Nothing
+                                |> setPage (Easy InvalidInput)
+                    in
+                    ( newModel, Cmd.none )
 
                 Err err ->
-                    ( { model | asts = Nothing, requestStatus = ReceivedError }, Cmd.none )
+                    let
+                        newModel =
+                            model
+                                |> setASTS Nothing
+                                |> setPage (Easy ReceivedError)
+                    in
+                    ( newModel, Cmd.none )
 
-        UserStepsReceived username result -> 
+        UserStepsReceived username result ->
             case result of
                 Ok (ast :: next) ->
-                    let url = "advanced/" ++ String.toLower username
+                    let
+                        newModel =
+                            model
+                                |> updateASTS ast next
+                                |> setPage (Advanced Good username)
                     in
-                    (updateASTS ast next model, Nav.pushUrl model.key url)
+                    ( newModel, Cmd.none )
 
                 Ok [] ->
-                    ( { model | asts = Nothing, requestStatus = InvalidInput }, Cmd.none )
+                    let
+                        newModel =
+                            model
+                                |> setASTS Nothing
+                                |> setPage (InsertUsername InvalidInput)
+                    in
+                    ( newModel, Cmd.none )
 
                 Err err ->
-                    ( { model | asts = Nothing, requestStatus = ReceivedError }, Cmd.none )
-        
+                    let
+                        newModel =
+                            model
+                                |> setASTS Nothing
+                                |> setPage (InsertUsername ReceivedError)
+                    in
+                    ( newModel, Cmd.none )
 
         NextState ->
             ( Tree.nextState model, Cmd.none )
@@ -91,12 +121,14 @@ update msg model =
             ( Tree.previousState model, Cmd.none )
 
         KeyDown key ->
-            if key == 13 then enterButtonPressed model 
+            if key == 13 then
+                enterButtonPressed model
+
             else
                 ( model, Cmd.none )
 
-        RefreshSteps -> 
-            (model, Request.getStepsFromStudent StepsReceived model.usernameStr)
+        RefreshSteps username ->
+            ( model, Request.getStepsFromStudent (UserStepsReceived username) username )
 
         LinkClicked urlRequest ->
             case urlRequest of
@@ -107,57 +139,89 @@ update msg model =
                     ( model, Nav.load href )
 
         UrlChanged url ->
-            ( { model | url = url, page = Route.urlToPage url }
-            , Cmd.none
-            )
+            let
+                newPage =
+                    Route.urlToPage url
+
+                cmd =
+                    case newPage of
+                        Advanced NotAsked username ->
+                            Request.getStepsFromStudent (UserStepsReceived username) username
+
+                        _ ->
+                            Cmd.none
+            in
+            ( resetInput { model | url = url, page = newPage }, cmd )
+
+
+resetInput : Model -> Model
+resetInput model =
+    { model | exprStr = Nothing, usernameStr = "", asts = Nothing }
+
+
+setPage : Page -> Model -> Model
+setPage newPage model =
+    { model | page = newPage }
+
+
+setASTS : Maybe ASTS -> Model -> Model
+setASTS newASTS model =
+    { model | asts = newASTS }
 
 
 updateASTS : AST -> List AST -> Model -> Model
-updateASTS ast next model = 
+updateASTS ast next model =
     let
-        newASTS = 
-            { current = ast 
+        newASTS =
+            { current = ast
             , next = next
-            , prev = [] 
+            , prev = []
             }
-
-        newModel =
-            { model 
-                | asts = Just newASTS
-                , requestStatus = Good
-            }
-        
-        url = "advanced/" ++ "raa009"
     in
-    newModel
+    { model | asts = Just newASTS }
 
 
-enterButtonPressed : Model -> (Model, Cmd Msg)
-enterButtonPressed model = 
-    let 
-        username = model.usernameStr
+enterButtonPressed : Model -> ( Model, Cmd Msg )
+enterButtonPressed model =
+    let
+        username =
+            model.usernameStr
+
+        url =
+            "/advanced/" ++ String.toLower username
     in
-    case model.page of 
-        InsertUsername -> 
-            -- TODO FIX ROUTE 
-            if validUsername username then 
-                (model, Request.getStepsFromStudent (UserStepsReceived username) username)
-            else (model, Cmd.none)
+    case model.page of
+        InsertUsername _ ->
+            if validUsername username then
+                ( model
+                , Cmd.batch
+                    [ Nav.pushUrl model.key url -- Må gjøres før request, fordi denne resetter ReqStatus
+                    , Request.getStepsFromStudent (UserStepsReceived username) username
+                    ]
+                )
 
-        Easy -> 
+            else
+                ( setPage (InsertUsername InvalidInput) model, Cmd.none )
+
+        Easy _ ->
             case model.exprStr of
-                    Just str ->
-                        ( model, Request.parseAndGetSteps StepsReceived str )
+                Just str ->
+                    ( model, Request.parseAndGetSteps StepsReceived str )
 
-                    Nothing ->
-                        ( model, Cmd.none )
+                Nothing ->
+                    ( model, Cmd.none )
 
-        _ -> 
+        _ ->
             ( model, Cmd.none )
 
-        
-validUsername : String -> Bool 
-validUsername _ = True -- TODO implement for input validation      
+
+validUsername : String -> Bool
+validUsername _ =
+    True
+
+
+
+-- TODO implement for input validation
 
 
 errorToString err =
@@ -188,11 +252,19 @@ responseToString res =
 
 view : Model -> Browser.Document Msg
 view model =
-    case model.page of 
-        Index -> Index.view model 
-        Advanced _ -> Advanced.view model 
-        InsertUsername -> Advanced.viewInsertUsername
-        Easy -> Easy.view model 
+    case model.page of
+        Index ->
+            Index.view model
+
+        Advanced status username ->
+            Advanced.view model status username
+
+        InsertUsername status ->
+            Advanced.viewInsertUsername status
+
+        Easy status ->
+            Easy.view model status
+
 
 
 ---- PROGRAM ----

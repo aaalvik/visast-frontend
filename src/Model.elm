@@ -1,22 +1,19 @@
-module Model exposing (..)
+module Model exposing (AST, ASTS, Children(..), Model, Msg(..), Name, Page(..), RequestStatus(..))
 
-import Browser.Navigation as Nav
 import Browser
-import Url 
+import Browser.Navigation as Nav
 import Http
 import RemoteData exposing (WebData)
+import Url
+
 
 type alias Model =
-    { requestStatus : RequestStatus 
-    , asts : Maybe ASTS
-    -- , currentAST : Maybe AST
-    -- , nextSteps : Maybe (List AST)
-    -- , previousSteps : Maybe (List AST)
+    { asts : Maybe ASTS
     , exprStr : Maybe String
-    , usernameStr : String 
+    , usernameStr : String
     , key : Nav.Key
-    , url : Url.Url 
-    , page : Page 
+    , url : Url.Url
+    , page : Page
     }
 
 
@@ -29,10 +26,9 @@ type Msg
     | NextState
     | PreviousState
     | KeyDown Int
-    | RefreshSteps 
+    | RefreshSteps String
     | LinkClicked Browser.UrlRequest
     | UrlChanged Url.Url
-
 
 
 type alias Name =
@@ -45,9 +41,9 @@ type alias AST =
     }
 
 
-type alias ASTS = 
+type alias ASTS =
     { current : AST
-    , prev : List AST 
+    , prev : List AST
     , next : List AST
     }
 
@@ -56,12 +52,15 @@ type Children
     = Children (List AST)
 
 
-type Page 
+type Page
     = Index
-    | Easy 
-    | Advanced String 
-    | InsertUsername
+    | Easy RequestStatus
+    | Advanced RequestStatus String
+    | InsertUsername RequestStatus
 
 
 type RequestStatus
-    = Good | InvalidInput | ReceivedError
+    = Good
+    | InvalidInput
+    | ReceivedError
+    | NotAsked
