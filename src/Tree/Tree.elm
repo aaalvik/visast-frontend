@@ -1,7 +1,7 @@
 module Tree.Tree exposing (drawTree)
 
 import Helpers.Width as Width
-import Html exposing (Html, div, text, strong)
+import Html exposing (Html, div, strong, text)
 import Model exposing (AST, Children(..))
 import Svg exposing (Svg, svg)
 import Svg.Attributes as Attrs exposing (..)
@@ -136,6 +136,7 @@ childrenXs parentX totalW childrenWidths =
         marginIfNotFirst prevW =
             if prevW == 0 then
                 0
+
             else
                 Width.marginBetween
 
@@ -192,7 +193,8 @@ drawTextInNode name xPos yPos =
 
 drawText : String -> Int -> Int -> String -> Svg msg
 drawText name xPos yPos fillColor =
-    Svg.text_ [ dominantBaseline "middle", textAnchor "middle", x (String.fromInt xPos), y (String.fromInt yPos), fill fillColor ] [ text name ]
+    Svg.g []
+        [ Svg.text_ [ dominantBaseline "middle", textAnchor "middle", x (String.fromInt xPos), y (String.fromInt yPos), fill fillColor ] [ text name ] ]
 
 
 nextY : Int -> Int
