@@ -151,7 +151,7 @@ update msg model =
                     ( model, Nav.load href )
 
         UrlChanged url ->
-            ( { model | url = url, page = Route.urlToPage url }, Cmd.none )
+            ( resetInput { model | url = url, page = Route.urlToPage url }, Cmd.none )
 
 
 resetInput : Model -> Model
