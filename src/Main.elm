@@ -22,7 +22,7 @@ init flags url key =
         cmd =
             case page of
                 Advanced NotAsked username ->
-                    Request.getStepsFromStudent (UserStepsReceived username) username
+                    Request.stepsAdvanced (UserStepsReceived username) username
 
                 _ ->
                     Cmd.none
@@ -63,7 +63,7 @@ update msg model =
         ParseAndGetSteps ->
             case model.exprStr of
                 Just str ->
-                    ( model, Request.parseAndGetSteps StepsReceived str )
+                    ( model, Request.stepsEasy StepsReceived str )
 
                 Nothing ->
                     ( model, Cmd.none )
@@ -140,7 +140,7 @@ update msg model =
                 ( model, Cmd.none )
 
         RefreshSteps username ->
-            ( model, Request.getStepsFromStudent (UserStepsReceived username) username )
+            ( model, Request.stepsAdvanced (UserStepsReceived username) username )
 
         LinkClicked urlRequest ->
             case urlRequest of
@@ -196,7 +196,7 @@ enterButtonPressed model =
                 ( model
                 , Cmd.batch
                     [ Nav.pushUrl model.key url -- Må gjøres før request, fordi denne resetter ReqStatus
-                    , Request.getStepsFromStudent (UserStepsReceived username) username
+                    , Request.stepsAdvanced (UserStepsReceived username) username
                     ]
                 )
 
@@ -206,7 +206,7 @@ enterButtonPressed model =
         Easy _ ->
             case model.exprStr of
                 Just str ->
-                    ( model, Request.parseAndGetSteps StepsReceived str )
+                    ( model, Request.stepsEasy StepsReceived str )
 
                 Nothing ->
                     ( model, Cmd.none )

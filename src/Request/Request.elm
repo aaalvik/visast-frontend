@@ -1,8 +1,8 @@
-module Request.Request exposing (parseAndGetSteps, getStepsFromStudent)
+module Request.Request exposing (stepsAdvanced, stepsEasy)
 
-import Request.Decode as Decode 
-import Request.Encode as Encode 
 import Http
+import Request.Decode as Decode
+import Request.Encode as Encode
 
 
 globalUrl : String
@@ -10,10 +10,10 @@ globalUrl =
     "https://visast-api-prod.herokuapp.com"
 
 
-parseAndGetSteps msg inputStr =
+stepsEasy msg inputStr =
     let
         url =
-            globalUrl ++ "/steps"
+            globalUrl ++ "/easy"
 
         body =
             Http.jsonBody (Encode.input inputStr)
@@ -24,12 +24,12 @@ parseAndGetSteps msg inputStr =
     Http.send msg request
 
 
-getStepsFromStudent msg keyStr = 
-    let 
-        url = 
-            globalUrl ++ "/getStepsFromStudent?studentKey=" ++ keyStr
-        
-        request = 
+stepsAdvanced msg keyStr =
+    let
+        url =
+            globalUrl ++ "/advanced?studentKey=" ++ keyStr
+
+        request =
             Http.get url Decode.steps
     in
-    Http.send msg request 
+    Http.send msg request
