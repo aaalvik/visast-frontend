@@ -1,4 +1,6 @@
 # Frontend of visAST
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.2623970.svg)](https://doi.org/10.5281/zenodo.2623970)
+
 This project was part of my master thesis at University of Bergen, where I developed the tool visAST and examined the usefulness of the tool in teaching. This repository contains the frontend of the project, the backend can be found here: [visast backend](https://github.com/aaalvik/visast-backend). 
 
 ## visAST
