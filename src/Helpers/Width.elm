@@ -1,4 +1,4 @@
-module Helpers.Width exposing (..)
+module Helpers.Width exposing (marginBetween, maximum, node, tree, wFACTOR)
 
 import Model exposing (AST, Children(..))
 
@@ -14,6 +14,7 @@ tree ast =
     in
     if List.isEmpty children then
         node ast.name
+
     else
         margin + (List.sum <| List.map tree children)
 
@@ -30,7 +31,7 @@ maximum widthFunction list =
 
 marginBetween : Int
 marginBetween =
-    35
+    40
 
 
 wFACTOR : Int
