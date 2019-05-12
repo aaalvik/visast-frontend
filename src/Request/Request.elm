@@ -27,7 +27,7 @@ stepsEasy msg inputStr =
 stepsAdvanced msg keyStr =
     let
         url =
-            globalUrl ++ "/advanced?studentKey=" ++ keyStr
+            globalUrl ++ "/advanced?lookupKey=" ++ keyStr
 
         request =
             Http.get url Decode.steps
